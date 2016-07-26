@@ -8,7 +8,7 @@ namespace HTTP_Server.core
 {
     public interface IConnection
     {
-        void Request();
-        void GetReply(String message);
+        int ReceiveResponse(byte[] buffer);
+        int SendReply(byte[] buffer);
     }
 }
