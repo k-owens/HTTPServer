@@ -41,7 +41,6 @@
   <ItemGroup>
     <Compile Include="IConnection.cs" />
     <Compile Include="Server.cs" />
-    <Compile Include="Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
