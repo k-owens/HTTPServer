@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using HTTP_Server.core;
 
 namespace HTTPServer.core
@@ -32,17 +27,22 @@ namespace HTTPServer.core
             return false;
         }
 
-        public void RespondWith404(IConnection connection)
+        public int RespondWith404(IConnection connection)
         {
-            
+            byte[] buffer = Encoding.UTF8.GetBytes("HTTP/1.1 404 Not Found\r\n"
+                         + "Content-Type:  text/html\r\n"
+                         + "\r\n"
+                         + "<html><body><h1>The requested page was not found.</h1></body></html>");
+            return connection.SendReply(buffer);
         }
 
-        public void RespondWith200(IConnection connection)
+        public int RespondWith200(IConnection connection)
         {
-            connection.GetReply("HTTP/1.1 200 OK\n"
-                + "Content-Type:  text/html\n"
-                + "\n"
-                + "<html><body><h1>Hello World</h1></body></html>");
+            byte[] buffer = Encoding.UTF8.GetBytes("HTTP/1.1 200 OK\r\n"
+                         + "Content-Type:  text/html\r\n"
+                         + "\r\n"
+                         + "<html><body><h1>Hello World</h1></body></html>");
+            return connection.SendReply(buffer);
         }
     }
 }

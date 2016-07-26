@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.IO;
 using Xunit;
 using HTTPServer.core;
 
@@ -7,7 +6,8 @@ namespace HTTPServer.test
 {
     public class ServerUnitTests
     {
-        Server server = new Server();
+        private Server server = new Server();
+        private MockConnection mock = new MockConnection();
 
         [Fact]
         public void ServerCanStart()
@@ -25,16 +25,30 @@ namespace HTTPServer.test
         [Fact]
         public void ServerCanRespond200()
         {
-            FileConnection file = new FileConnection();
+            var i = server.RespondWith200(mock);
+            var sentMessage = ReadMockStream();
+            Assert.Equal("HTTP/1.1 200 OK\r\n"
+                         + "Content-Type:  text/html\r\n"
+                         + "\r\n"
+                         + "<html><body><h1>Hello World</h1></body></html>", sentMessage);
+        }
 
-            server.Start();
-            server.RespondWith200(file);
-            String str = System.IO.File.ReadAllText(
-                @"C:\gitwork\HTTP Server\HTTPServer.test\ReplyOutput.txt");
-            Assert.Equal("HTTP/1.1 200 OK\n"
-                + "Content-Type:  text/html\n"
-                + "\n"
-                + "<html><body><h1>Hello World</h1></body></html>", str);
+        [Fact]
+        public void ServerCanRespond404()
+        {
+            var i = server.RespondWith404(mock);
+            var sentMessage = ReadMockStream();
+            Assert.Equal("HTTP/1.1 404 Not Found\r\n"
+                         + "Content-Type:  text/html\r\n"
+                         + "\r\n"
+                         + "<html><body><h1>The requested page was not found.</h1></body></html>", sentMessage);
+        }
+
+        private string ReadMockStream()
+        {
+            mock.MStream.Position = 0;
+            var sReader = new StreamReader(mock.MStream);
+            return sReader.ReadToEnd();
         }
     }
 }
