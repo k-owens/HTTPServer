@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTPServer.core", "HTTP Ser
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTPServer.test", "HTTPServer.test\HTTPServer.test.csproj", "{F2D141A9-69B4-4555-AAEE-9067B326A0B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTPServer.driver", "HTTPServer.driver\HTTPServer.driver.csproj", "{48837020-D0A4-4B95-B004-324C247609C9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{F2D141A9-69B4-4555-AAEE-9067B326A0B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2D141A9-69B4-4555-AAEE-9067B326A0B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2D141A9-69B4-4555-AAEE-9067B326A0B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48837020-D0A4-4B95-B004-324C247609C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48837020-D0A4-4B95-B004-324C247609C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48837020-D0A4-4B95-B004-324C247609C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48837020-D0A4-4B95-B004-324C247609C9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
