@@ -1,54 +1,77 @@
 ﻿using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
 using Xunit;
 using HTTPServer.core;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Assert = Xunit.Assert;
 
 namespace HTTPServer.test
 {
+    [TestClass]
     public class ServerUnitTests
     {
         private Server server = new Server();
-        private MockConnection mock = new MockConnection();
+        private byte[] bytesReturned;
+        private IPAddress ipAddress;
+        private IPEndPoint ipEndPoint;
+        private Socket socket;
 
-        [Fact]
+        [TestMethod]
         public void ServerCanStart()
         {
             Assert.True(server.Start() && server.Running);
+            server.Stop();
         }
 
-        [Fact]
+        [TestMethod]
         public void ServerCanStop()
         {
             server.Start();
             Assert.True(server.Stop() && !server.Running);
         }
 
-        [Fact]
-        public void ServerCanRespond200()
+        [TestMethod]
+        public void ServerCanEchoData()
         {
-            var i = server.RespondWith200(mock);
-            var sentMessage = ReadMockStream();
-            Assert.Equal("HTTP/1.1 200 OK\r\n"
-                         + "Content-Type:  text/html\r\n"
-                         + "\r\n"
-                         + "<html><body><h1>Hello World</h1></body></html>", sentMessage);
+            SetUpClient();
+            ConnectClientToServer(socket, ipEndPoint);
+            var message = CommunicateWithServer(socket, bytesReturned);
+            CloseConnectionWithServer(socket);
+            Assert.Equal("This is the message sent by the client.", message);
         }
 
-        [Fact]
-        public void ServerCanRespond404()
+        private void SetUpClient()
         {
-            var i = server.RespondWith404(mock);
-            var sentMessage = ReadMockStream();
-            Assert.Equal("HTTP/1.1 404 Not Found\r\n"
-                         + "Content-Type:  text/html\r\n"
-                         + "\r\n"
-                         + "<html><body><h1>The requested page was not found.</h1></body></html>", sentMessage);
+            bytesReturned = new byte[1024];
+            ipAddress = IPAddress.Parse("127.0.0.1");
+            ipEndPoint = new IPEndPoint(ipAddress, 8080);
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
 
-        private string ReadMockStream()
+        private void CloseConnectionWithServer(Socket socket)
         {
-            mock.MStream.Position = 0;
-            var sReader = new StreamReader(mock.MStream);
-            return sReader.ReadToEnd();
+            server.Stop();
+            socket.Close();
+        }
+
+        private string CommunicateWithServer(Socket socket, byte[] bytesReturned)
+        {
+            byte[] bytesToSend;
+            bytesToSend = Encoding.UTF8.GetBytes("This is the message sent by the client.");
+            socket.Send(bytesToSend);
+            server.HandleData();
+            socket.Receive(bytesReturned);
+            var message = Encoding.UTF8.GetString(bytesReturned, 0, bytesToSend.Length);
+            return message;
+        }
+
+        private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint)
+        {
+            server.Start();
+            socket.Connect(ipEndPoint);
+            server.ConnectToClient();
         }
     }
 }
