@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using HTTP_Server.core;
 
 namespace HTTPServer.core
 {
     public class Server
     {
         public bool Running = false;
-        private Socket socket;
-        private Socket clientConnection;
+        private ISocket socket;
+        private ISocket clientConnection;
 
         public Server Start(int port)
         {
@@ -17,7 +18,7 @@ namespace HTTPServer.core
             Running = true;
             var ipAddress = IPAddress.Any;
             var ipEndPoint = new IPEndPoint(ipAddress, port);
-            socket = new Socket(AddressFamily.InterNetwork,SocketType.Stream, ProtocolType.Tcp);
+            socket = new NetworkSocket();
             PrepareSocketForConnection(ipEndPoint);
             Console.WriteLine("Echo server has started at port " + port.ToString());
             return this;
