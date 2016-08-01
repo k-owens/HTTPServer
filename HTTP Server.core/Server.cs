@@ -8,54 +8,58 @@ namespace HTTPServer.core
     {
         public bool Running = false;
         private Socket socket;
-        private Socket client;
+        private Socket clientConnection;
 
-        public bool Start()
+        public Server Start(int port)
         {
-            if (Running) return false;
+            if (Running) return null;
 
             Running = true;
-            Console.WriteLine("Echo server has started.");
-            var ipAddress = IPAddress.Parse("127.0.0.1");
-            var ipEndPoint = new IPEndPoint(ipAddress, 8080);
+            var ipAddress = IPAddress.Any;
+            var ipEndPoint = new IPEndPoint(ipAddress, port);
             socket = new Socket(AddressFamily.InterNetwork,SocketType.Stream, ProtocolType.Tcp);
             PrepareSocketForConnection(ipEndPoint);
-            return true;
+            Console.WriteLine("Echo server has started at port " + port.ToString());
+            return this;
+        }
+
+        public void HandleClients()
+        {
+            while (true)
+            {
+                ConnectToClient();
+                HandleData();
+            }
         }
 
         private void PrepareSocketForConnection(IPEndPoint ipEndPoint)
         {
             socket.Bind(ipEndPoint);
-            Console.WriteLine("Server socket is now bound to an end point.");
             socket.Listen(100);
-            Console.WriteLine("Server has started listening.");
         }
 
-        public void ConnectToClient()
+        private void ConnectToClient()
         {
-            client = socket.Accept();
-            Console.WriteLine("Server has connected to the client.");
+            clientConnection = socket.Accept();
         }
 
-        public void HandleData()
+        private void HandleData()
         {
             byte[] buffer = new byte[1024];
 
             ReceiveData(buffer);
             SendData(buffer);
-            client.Close();
+            clientConnection.Close();
         }
 
         private void SendData(byte[] buffer)
         {
-            client.Send(buffer);
-            Console.WriteLine("Server is sending data back.");
+            clientConnection.Send(buffer);
         }
 
         private void ReceiveData(byte[] buffer)
         {
-            client.Receive(buffer);
-            Console.WriteLine("Server has received data.");
+            clientConnection.Receive(buffer);
         }
 
         public bool Stop()
@@ -64,7 +68,6 @@ namespace HTTPServer.core
 
             Running = false;
             socket.Close();
-            Console.WriteLine("Server has stopped.");
             return true;
         }
     }
