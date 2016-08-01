@@ -1,7 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Concurrent;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using HTTPServer.core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,14 +25,14 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStart()
         {
-            Assert.True(server.Start() && server.Running);
+            Assert.True(server.Start(8080) != null && server.Running);
             server.Stop();
         }
 
         [TestMethod]
         public void ServerCanStop()
         {
-            server.Start();
+            server.Start(8080);
             Assert.True(server.Stop() && !server.Running);
         }
 
@@ -36,8 +40,24 @@ namespace HTTPServer.test
         public void ServerCanEchoData()
         {
             SetUpClient();
-            ConnectClientToServer(socket, ipEndPoint);
-            var message = CommunicateWithServer(socket, bytesReturned);
+            var message = "";
+            Action<object> action1 = (object obj) =>
+            {
+                ConnectClientToServer(socket, ipEndPoint);
+            };
+
+            Action<object> action2 = (object obj) =>
+            {
+                message = CommunicateWithServer(socket, bytesReturned);
+            };
+
+            Task t1 = new Task(action1, "");
+            Task t2 = new Task(action2,"");
+
+            t1.Start();
+            System.Threading.Thread.Sleep(5000);
+            t2.Start();
+            t2.Wait();
             CloseConnectionWithServer(socket);
             Assert.Equal("This is the message sent by the client.", message);
         }
@@ -61,7 +81,6 @@ namespace HTTPServer.test
             byte[] bytesToSend;
             bytesToSend = Encoding.UTF8.GetBytes("This is the message sent by the client.");
             socket.Send(bytesToSend);
-            server.HandleData();
             socket.Receive(bytesReturned);
             var message = Encoding.UTF8.GetString(bytesReturned, 0, bytesToSend.Length);
             return message;
@@ -69,9 +88,9 @@ namespace HTTPServer.test
 
         private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint)
         {
-            server.Start();
+            server.Start(8080);
             socket.Connect(ipEndPoint);
-            server.ConnectToClient();
+            server.HandleClients();
         }
     }
 }
