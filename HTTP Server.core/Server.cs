@@ -69,6 +69,8 @@ namespace HTTPServer.core
 
             Running = false;
             socket.Close();
+            if(clientConnection != null)
+                clientConnection.Close();
             return true;
         }
     }

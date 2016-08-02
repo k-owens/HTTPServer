@@ -23,7 +23,7 @@ namespace HTTPServer.driver
             if (args.Length == 2)
             {
                 if (args[0].Equals("-p"))
-                    port = Int32.Parse(args[0]);
+                    port = Int32.Parse(args[1]);
                 else
                     throw new Exception();
             }

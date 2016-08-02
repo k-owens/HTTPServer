@@ -39,7 +39,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IConnection.cs" />
+    <Compile Include="ISocket.cs" />
+    <Compile Include="NetworkSocket.cs" />
     <Compile Include="Server.cs" />
   </ItemGroup>
   <ItemGroup>
