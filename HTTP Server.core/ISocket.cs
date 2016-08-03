@@ -5,15 +5,16 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HTTP_Server.core
+namespace HTTPServer.core
 {
-    interface ISocket
+    public interface ISocket
     {
+        EndPoint LocalEndPoint();
         void Bind(IPEndPoint ipEndPoint);
         void Listen(int backlog);
         ISocket Accept();
         void Close();
-        void Send(byte[] buffer);
-        void Receive(byte[] buffer);
+        int Send(byte[] buffer);
+        int Receive(byte[] buffer);
     }
 }

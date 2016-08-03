@@ -25,19 +25,19 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStart()
         {
-            Assert.True(server.Start(8080) != null && server.Running);
+            Assert.True(server.Start(8080, new NetworkSocket()) != null && server.Running);
             server.Stop();
         }
 
         [TestMethod]
         public void ServerCanStop()
         {
-            server.Start(8080);
+            server.Start(8080, new NetworkSocket());
             Assert.True(server.Stop() && !server.Running);
         }
 
         [TestMethod]
-        public void ServerCanEchoData()
+        public void ServerCanReturn200()
         {
             SetUpClient();
             var message = "";
@@ -48,21 +48,47 @@ namespace HTTPServer.test
 
             Action<object> action2 = (object obj) =>
             {
-                message = CommunicateWithServer(socket, bytesReturned);
+                message = CommunicateWithServer200(socket, bytesReturned);
             };
 
             Task t1 = new Task(action1, "");
-            Task t2 = new Task(action2,"");
+            Task t2 = new Task(action2, "");
 
             t1.Start();
-            System.Threading.Thread.Sleep(5000);
+            System.Threading.Thread.Sleep(100);
             t2.Start();
             t2.Wait();
             CloseConnectionWithServer(socket);
-            Assert.Equal("This is the message sent by the client.", message);
+            Assert.Equal("http/1.1 200 OK\r\n", message);
         }
 
-        private void SetUpClient()
+        [TestMethod]
+        public void ServerCanReturn404()
+        {
+            SetUpClient();
+            var message = "";
+            Action<object> action1 = (object obj) =>
+            {
+                ConnectClientToServer(socket, ipEndPoint);
+            };
+
+            Action<object> action2 = (object obj) =>
+            {
+                message = CommunicateWithServer404(socket, bytesReturned);
+            };
+
+            Task t1 = new Task(action1, "");
+            Task t2 = new Task(action2, "");
+
+            t1.Start();
+            System.Threading.Thread.Sleep(100);
+            t2.Start();
+            t2.Wait();
+            CloseConnectionWithServer(socket);
+            Assert.Equal("http/1.1 404 Not Found\r\n", message);
+        }
+
+    private void SetUpClient()
         {
             bytesReturned = new byte[1024];
             ipAddress = IPAddress.Parse("127.0.0.1");
@@ -76,19 +102,27 @@ namespace HTTPServer.test
             socket.Close();
         }
 
-        private string CommunicateWithServer(Socket socket, byte[] bytesReturned)
+        private string CommunicateWithServer200(Socket socket, byte[] bytesReturned)
         {
-            byte[] bytesToSend;
-            bytesToSend = Encoding.UTF8.GetBytes("This is the message sent by the client.");
+            byte[] bytesToSend = Encoding.UTF8.GetBytes("GET / http/1.1\r\n");
             socket.Send(bytesToSend);
-            socket.Receive(bytesReturned);
-            var message = Encoding.UTF8.GetString(bytesReturned, 0, bytesToSend.Length);
+            var bytesReceived = socket.Receive(bytesReturned);
+            var message = Encoding.UTF8.GetString(bytesReturned).Substring(0,bytesReceived);
+            return message;
+        }
+
+        private string CommunicateWithServer404(Socket socket, byte[] bytesReturned)
+        {
+            byte[] bytesToSend = Encoding.UTF8.GetBytes("GET /extension http/1.1\r\n");
+            socket.Send(bytesToSend);
+            var bytesReceived = socket.Receive(bytesReturned);
+            var message = Encoding.UTF8.GetString(bytesReturned).Substring(0, bytesReceived);
             return message;
         }
 
         private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint)
         {
-            server.Start(8080);
+            server.Start(8080, new NetworkSocket());
             socket.Connect(ipEndPoint);
             server.HandleClients();
         }

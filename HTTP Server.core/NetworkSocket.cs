@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace HTTP_Server.core
+namespace HTTPServer.core
 {
-    class NetworkSocket: ISocket
+    public class NetworkSocket: ISocket
     {
         private Socket thisSocket;
 
@@ -20,6 +15,11 @@ namespace HTTP_Server.core
         public NetworkSocket(Socket socket)
         {
             thisSocket = socket;
+        }
+
+        public EndPoint LocalEndPoint()
+        {
+            return thisSocket.LocalEndPoint;
         }
 
         public void Bind(IPEndPoint ipEndPoint)
@@ -43,14 +43,14 @@ namespace HTTP_Server.core
             thisSocket.Close();
         }
 
-        public void Send(byte[] buffer)
+        public int Send(byte[] buffer)
         {
-            thisSocket.Send(buffer);
+            return thisSocket.Send(buffer);
         }
 
-        public void Receive(byte[] buffer)
+        public int Receive(byte[] buffer)
         {
-            thisSocket.Receive(buffer);
+            return thisSocket.Receive(buffer);
         }
     }
 }

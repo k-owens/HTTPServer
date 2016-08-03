@@ -12,7 +12,7 @@ namespace HTTPServer.driver
 
         public static void Main(string[] args)
         {
-            server.Start(HandlePort(args));
+            server.Start(HandlePort(args), new NetworkSocket());
             server.HandleClients();
 
         }
@@ -29,7 +29,7 @@ namespace HTTPServer.driver
             }
             else
             {
-                port = 8080;
+                port = 0;
             }
             return port;
         }

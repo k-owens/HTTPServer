@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
-using System.Net.Sockets;
-using HTTP_Server.core;
+using System.Text;
 
 namespace HTTPServer.core
 {
@@ -11,16 +10,16 @@ namespace HTTPServer.core
         private ISocket socket;
         private ISocket clientConnection;
 
-        public Server Start(int port)
+        public Server Start(int port, ISocket startSocket)
         {
             if (Running) return null;
 
             Running = true;
             var ipAddress = IPAddress.Any;
             var ipEndPoint = new IPEndPoint(ipAddress, port);
-            socket = new NetworkSocket();
+            socket = startSocket;
             PrepareSocketForConnection(ipEndPoint);
-            Console.WriteLine("Echo server has started at port " + port.ToString());
+            Console.WriteLine("Server has started at port " + ((IPEndPoint)socket.LocalEndPoint()).Port);
             return this;
         }
 
@@ -47,10 +46,19 @@ namespace HTTPServer.core
         private void HandleData()
         {
             byte[] buffer = new byte[1024];
-
-            ReceiveData(buffer);
-            SendData(buffer);
+            int bytesReceived = ReceiveData(buffer);
+            SendData(HandleReply(buffer,bytesReceived));
             clientConnection.Close();
+        }
+
+        private  byte[] HandleReply(byte[] request, int requestSize)
+        {
+            var requestMessage = Encoding.UTF8.GetString(request).Substring(0,requestSize);
+            var uri = requestMessage.Split(' ',' ')[1];
+            if (uri.Equals("/"))
+                return Encoding.UTF8.GetBytes("http/1.1 200 OK\r\n");
+            
+            return Encoding.UTF8.GetBytes("http/1.1 404 Not Found\r\n");
         }
 
         private void SendData(byte[] buffer)
@@ -58,19 +66,16 @@ namespace HTTPServer.core
             clientConnection.Send(buffer);
         }
 
-        private void ReceiveData(byte[] buffer)
+        private int ReceiveData(byte[] buffer)
         {
-            clientConnection.Receive(buffer);
+            return clientConnection.Receive(buffer);
         }
 
         public bool Stop()
         {
-            if (!Running) return false;
-
             Running = false;
-            socket.Close();
-            if(clientConnection != null)
-                clientConnection.Close();
+            socket?.Close();
+            clientConnection?.Close();
             return true;
         }
     }
