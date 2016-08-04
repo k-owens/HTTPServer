@@ -16,5 +16,6 @@ namespace HTTPServer.core
         void Close();
         int Send(byte[] buffer);
         int Receive(byte[] buffer);
+        void Connect(IPEndPoint ipEndPoint);
     }
 }

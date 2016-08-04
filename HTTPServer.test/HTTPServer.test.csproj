@@ -66,6 +66,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="DataHolder.cs" />
+    <Compile Include="MockConnection.cs" />
     <Compile Include="ServerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
