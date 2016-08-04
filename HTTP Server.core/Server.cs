@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Text;
 
@@ -45,16 +46,42 @@ namespace HTTPServer.core
 
         private void HandleData()
         {
-            byte[] buffer = new byte[1024];
-            int bytesReceived = ReceiveData(buffer);
-            SendData(HandleReply(buffer,bytesReceived));
+            List<byte> messageReceived = new List<byte>();
+            while (true)
+            {
+                byte[] buffer = new byte[1024];
+                int bytesReceived = ReceiveData(buffer);
+                for (int i = 0; i < bytesReceived; i++)
+                {
+                    messageReceived.Add(buffer[i]);
+                }
+                if (bytesReceived < 1024)
+                    break;
+            }
+
+            byte[] message = new byte[messageReceived.Count];
+            for (int j = 0; j < messageReceived.Count; j++)
+            {
+                message[j] = messageReceived[j];
+            }
+
+            Console.WriteLine("Message received: " + Encoding.UTF8.GetString(message));
+            SendData(HandleReply(message, messageReceived.Count));
             clientConnection.Close();
         }
 
         private  byte[] HandleReply(byte[] request, int requestSize)
         {
             var requestMessage = Encoding.UTF8.GetString(request).Substring(0,requestSize);
-            var uri = requestMessage.Split(' ',' ')[1];
+            var uri = "";
+            try
+            {
+                uri = requestMessage.Split(' ', ' ')[1];
+            }
+            catch
+            {
+                uri = "";
+            }
             if (uri.Equals("/"))
                 return Encoding.UTF8.GetBytes("http/1.1 200 OK\r\n");
             
