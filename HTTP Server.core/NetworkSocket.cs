@@ -52,5 +52,10 @@ namespace HTTPServer.core
         {
             return thisSocket.Receive(buffer);
         }
+
+        public void Connect(IPEndPoint ipEndPoint)
+        {
+            thisSocket.Connect(ipEndPoint);
+        }
     }
 }

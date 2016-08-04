@@ -17,10 +17,10 @@ namespace HTTPServer.test
     public class ServerUnitTests
     {
         private Server server = new Server();
-        private byte[] bytesReturned;
-        private IPAddress ipAddress;
-        private IPEndPoint ipEndPoint;
-        private Socket socket;
+        private byte[] _bytesReturned;
+        private IPAddress _ipAddress;
+        private IPEndPoint _ipEndPoint;
+        private Socket _socket;
 
         [TestMethod]
         public void ServerCanStart()
@@ -43,12 +43,12 @@ namespace HTTPServer.test
             var message = "";
             Action<object> action1 = (object obj) =>
             {
-                ConnectClientToServer(socket, ipEndPoint);
+                ConnectClientToServer(_socket, _ipEndPoint);
             };
 
             Action<object> action2 = (object obj) =>
             {
-                message = CommunicateWithServer200(socket, bytesReturned);
+                message = CommunicateWithServer200(_socket, _bytesReturned);
             };
 
             Task t1 = new Task(action1, "");
@@ -58,7 +58,7 @@ namespace HTTPServer.test
             System.Threading.Thread.Sleep(100);
             t2.Start();
             t2.Wait();
-            CloseConnectionWithServer(socket);
+            CloseConnectionWithServer(_socket);
             Assert.Equal("http/1.1 200 OK\r\n", message);
         }
 
@@ -69,12 +69,12 @@ namespace HTTPServer.test
             var message = "";
             Action<object> action1 = (object obj) =>
             {
-                ConnectClientToServer(socket, ipEndPoint);
+                ConnectClientToServer(_socket, _ipEndPoint);
             };
 
             Action<object> action2 = (object obj) =>
             {
-                message = CommunicateWithServer404(socket, bytesReturned);
+                message = CommunicateWithServer404(_socket, _bytesReturned);
             };
 
             Task t1 = new Task(action1, "");
@@ -84,16 +84,42 @@ namespace HTTPServer.test
             System.Threading.Thread.Sleep(100);
             t2.Start();
             t2.Wait();
-            CloseConnectionWithServer(socket);
+            CloseConnectionWithServer(_socket);
             Assert.Equal("http/1.1 404 Not Found\r\n", message);
         }
 
-    private void SetUpClient()
+        [TestMethod]
+        public void ServerCanReply200()
         {
-            bytesReturned = new byte[1024];
-            ipAddress = IPAddress.Parse("127.0.0.1");
-            ipEndPoint = new IPEndPoint(ipAddress, 8080);
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            TestResponse("GET / http/1.1\r\n", "http/1.1 200 OK\r\n");
+        }
+
+        [TestMethod]
+        public void ServerCanReply404()
+        {
+            TestResponse("GET /extension http/1.1\r\n","http/1.1 404 Not Found\r\n");
+        }
+        private static void TestResponse(string request, string expectedReply)
+        {
+            MockConnection mock = new MockConnection();
+            MockConnection serverConnection = new MockConnection();
+            Server testServer = new Server();
+            byte[] buffer = new byte[1024];
+
+            mock.Send(Encoding.UTF8.GetBytes(request));
+            testServer.Start(0, serverConnection);
+            testServer.ConnectToClient();
+            testServer.HandleData();
+            int bytesReceived = serverConnection.Receive(buffer);
+            Assert.Equal(expectedReply, Encoding.UTF8.GetString(buffer).Substring(0, bytesReceived));
+        }
+
+        private void SetUpClient()
+        {
+            _bytesReturned = new byte[1024];
+            _ipAddress = IPAddress.Parse("127.0.0.1");
+            _ipEndPoint = new IPEndPoint(_ipAddress, 8080);
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
 
         private void CloseConnectionWithServer(Socket socket)
