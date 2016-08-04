@@ -13,8 +13,6 @@ namespace HTTPServer.core
 
         public Server Start(int port, ISocket startSocket)
         {
-            if (Running) return null;
-
             Running = true;
             var ipAddress = IPAddress.Any;
             var ipEndPoint = new IPEndPoint(ipAddress, port);
@@ -39,12 +37,12 @@ namespace HTTPServer.core
             socket.Listen(100);
         }
 
-        private void ConnectToClient()
+        public void ConnectToClient()
         {
             clientConnection = socket.Accept();
         }
 
-        private void HandleData()
+        public void HandleData()
         {
             List<byte> messageReceived = new List<byte>();
             while (true)
