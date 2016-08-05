@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Text;
 
@@ -11,12 +10,10 @@ namespace HTTPServer.core
         public bool Running = false;
         private ISocket socket;
         private ISocket clientConnection;
-        private string directoryPath;
 
-        public Server Start(int port, ISocket startSocket, string directory)
+        public Server Start(int port, ISocket startSocket)
         {
             Running = true;
-            directoryPath = directory;
             var ipAddress = IPAddress.Any;
             var ipEndPoint = new IPEndPoint(ipAddress, port);
             socket = startSocket;
@@ -85,40 +82,18 @@ namespace HTTPServer.core
             }
             catch
             {
-                return Encoding.UTF8.GetBytes(CreateMessage("HTTP/1.1 400 Bad Request\r\n"));
+                return Encoding.UTF8.GetBytes("HTTP/1.1 400 Bad Request\r\n");
             }
-            if (version.Equals("HTTP/1.1\r\n") && IsRequestMethod(method))
+            if (version.Equals("HTTP/1.1\r\n") && isRequestMethod(method))
             {
                 if (uri.Equals("/"))
-                    return Encoding.UTF8.GetBytes(CreateMessage("HTTP/1.1 200 OK\r\n"));
-                return Encoding.UTF8.GetBytes(CreateMessage("HTTP/1.1 404 Not Found\r\n"));
+                    return Encoding.UTF8.GetBytes("HTTP/1.1 200 OK\r\n");
+                return Encoding.UTF8.GetBytes("HTTP/1.1 404 Not Found\r\n");
             }
-            return Encoding.UTF8.GetBytes(CreateMessage("HTTP/1.1 400 Bad Request\r\n"));
+            return Encoding.UTF8.GetBytes("HTTP/1.1 400 Bad Request\r\n");
         }
 
-        public string CreateMessage(string str)
-        {
-            if (directoryPath.Equals(""))
-                return str;
-            string[] files = Directory.GetFiles(directoryPath);
-            string[] directories = Directory.GetDirectories(directoryPath);
-            var message = str + "\r\n" +
-                             "<html>\r\n" +
-                             "<body>\r\n" ;
-            foreach (var folder in directories)
-            {
-                message += "<p>\r\n" + folder + "\r\n" + "</p>\r\n";
-            }
-            foreach (var file in files)
-            {
-                message += "<p>\r\n" + file + "\r\n" + "</p>\r\n";
-            }
-            message += "</body>\r\n" +
-                       "</html>";
-            return message;
-        }
-
-        private bool IsRequestMethod(string str)
+        private bool isRequestMethod(string str)
         {
             return str.Equals("GET");
         }

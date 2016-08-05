@@ -25,14 +25,14 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStart()
         {
-            Assert.True(server.Start(8080, new NetworkSocket(), "") != null && server.Running);
+            Assert.True(server.Start(8080, new NetworkSocket()) != null && server.Running);
             server.Stop();
         }
 
         [TestMethod]
         public void ServerCanStop()
         {
-            server.Start(8080, new NetworkSocket(), "");
+            server.Start(8080, new NetworkSocket());
             Assert.True(server.Stop() && !server.Running);
         }
 
@@ -91,81 +91,28 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanReply200()
         {
-            TestResponse("GET / HTTP/1.1\r\n", "HTTP/1.1 200 OK\r\n","");
+            TestResponse("GET / HTTP/1.1\r\n", "HTTP/1.1 200 OK\r\n");
         }
 
         [TestMethod]
         public void ServerCanReply404()
         {
-            TestResponse("GET /extension HTTP/1.1\r\n","HTTP/1.1 404 Not Found\r\n","");
+            TestResponse("GET /extension HTTP/1.1\r\n","HTTP/1.1 404 Not Found\r\n");
         }
 
         [TestMethod]
         public void ServerWillGive400ForMalformedRequests()
         {
-            TestResponse("GET / http/1.1\r\n", "HTTP/1.1 400 Bad Request\r\n","");
+            TestResponse("GET / http/1.1\r\n", "HTTP/1.1 400 Bad Request\r\n");
         }
 
         [TestMethod]
         public void ServerWillGive400ForWrongVersion()
         {
-            TestResponse("GET / HTTP/1.0", "HTTP/1.1 400 Bad Request\r\n","");
+            TestResponse("GET / HTTP/1.0", "HTTP/1.1 400 Bad Request\r\n");
         }
 
-        [TestMethod]
-        public void ServerCanReturnFilesInDirectory()
-        {
-            TestResponse("GET / HTTP/1.1\r\n", "HTTP/1.1 200 OK\r\n" +
-                                               "\r\n" +
-                                               "<html>\r\n" +
-                                               "<body>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\.git\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\.vs\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\HTTP Server.core\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\HTTPServer.driver\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\HTTPServer.run\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\HTTPServer.test\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\packages\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\TestResults\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\.gitattributes\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\.gitignore\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\HTTP Server.core.dll\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\HTTPServer.sln\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\server.config\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\server.exe\r\n" +
-                                               "</p>\r\n" +
-                                               "</body>\r\n" +
-                                               "</html>", @"C:\gitwork\HTTP Server");
-        }
-
-        private static void TestResponse(string request, string expectedReply, string directory)
+        private static void TestResponse(string request, string expectedReply)
         {
             MockConnection mock = new MockConnection();
             MockConnection serverConnection = new MockConnection();
@@ -173,7 +120,7 @@ namespace HTTPServer.test
             byte[] buffer = new byte[1024];
 
             mock.Send(Encoding.UTF8.GetBytes(request));
-            testServer.Start(0, serverConnection, directory);
+            testServer.Start(0, serverConnection);
             testServer.ConnectToClient();
             testServer.HandleData();
             int bytesReceived = serverConnection.Receive(buffer);
@@ -214,7 +161,7 @@ namespace HTTPServer.test
 
         private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint)
         {
-            server.Start(8080, new NetworkSocket(), "");
+            server.Start(8080, new NetworkSocket());
             socket.Connect(ipEndPoint);
             server.HandleClients();
         }
