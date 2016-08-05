@@ -49,21 +49,20 @@ namespace HTTPServer.core
             {
                 byte[] buffer = new byte[1024];
                 int bytesReceived = ReceiveData(buffer);
-                for (int i = 0; i < bytesReceived; i++)
+                for (int bufferIndex = 0; bufferIndex < bytesReceived; bufferIndex++)
                 {
-                    messageReceived.Add(buffer[i]);
+                    messageReceived.Add(buffer[bufferIndex]);
                 }
                 if (bytesReceived < 1024)
                     break;
             }
 
             byte[] message = new byte[messageReceived.Count];
-            for (int j = 0; j < messageReceived.Count; j++)
+            for (int copyIndex = 0; copyIndex < messageReceived.Count; copyIndex++)
             {
-                message[j] = messageReceived[j];
+                message[copyIndex] = messageReceived[copyIndex];
             }
 
-            Console.WriteLine("Message received: " + Encoding.UTF8.GetString(message));
             SendData(HandleReply(message, messageReceived.Count));
             clientConnection.Close();
         }
@@ -72,18 +71,31 @@ namespace HTTPServer.core
         {
             var requestMessage = Encoding.UTF8.GetString(request).Substring(0,requestSize);
             var uri = "";
+            var method = "";
+            var version = "";
             try
             {
-                uri = requestMessage.Split(' ', ' ')[1];
+                string[] requestLine = requestMessage.Split(' ',' ');
+                method = requestLine[0];
+                uri = requestLine[1];
+                version = requestLine[2];
             }
             catch
             {
-                uri = "";
+                return Encoding.UTF8.GetBytes("HTTP/1.1 400 Bad Request\r\n");
             }
-            if (uri.Equals("/"))
-                return Encoding.UTF8.GetBytes("http/1.1 200 OK\r\n");
-            
-            return Encoding.UTF8.GetBytes("http/1.1 404 Not Found\r\n");
+            if (version.Equals("HTTP/1.1\r\n") && isRequestMethod(method))
+            {
+                if (uri.Equals("/"))
+                    return Encoding.UTF8.GetBytes("HTTP/1.1 200 OK\r\n");
+                return Encoding.UTF8.GetBytes("HTTP/1.1 404 Not Found\r\n");
+            }
+            return Encoding.UTF8.GetBytes("HTTP/1.1 400 Bad Request\r\n");
+        }
+
+        private bool isRequestMethod(string str)
+        {
+            return str.Equals("GET");
         }
 
         private void SendData(byte[] buffer)
