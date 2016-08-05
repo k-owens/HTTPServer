@@ -59,7 +59,7 @@ namespace HTTPServer.test
             t2.Start();
             t2.Wait();
             CloseConnectionWithServer(_socket);
-            Assert.Equal("http/1.1 200 OK\r\n", message);
+            Assert.Equal("HTTP/1.1 200 OK\r\n", message);
         }
 
         [TestMethod]
@@ -85,20 +85,33 @@ namespace HTTPServer.test
             t2.Start();
             t2.Wait();
             CloseConnectionWithServer(_socket);
-            Assert.Equal("http/1.1 404 Not Found\r\n", message);
+            Assert.Equal("HTTP/1.1 404 Not Found\r\n", message);
         }
 
         [TestMethod]
         public void ServerCanReply200()
         {
-            TestResponse("GET / http/1.1\r\n", "http/1.1 200 OK\r\n");
+            TestResponse("GET / HTTP/1.1\r\n", "HTTP/1.1 200 OK\r\n");
         }
 
         [TestMethod]
         public void ServerCanReply404()
         {
-            TestResponse("GET /extension http/1.1\r\n","http/1.1 404 Not Found\r\n");
+            TestResponse("GET /extension HTTP/1.1\r\n","HTTP/1.1 404 Not Found\r\n");
         }
+
+        [TestMethod]
+        public void ServerWillGive400ForMalformedRequests()
+        {
+            TestResponse("GET / http/1.1\r\n", "HTTP/1.1 400 Bad Request\r\n");
+        }
+
+        [TestMethod]
+        public void ServerWillGive400ForWrongVersion()
+        {
+            TestResponse("GET / HTTP/1.0", "HTTP/1.1 400 Bad Request\r\n");
+        }
+
         private static void TestResponse(string request, string expectedReply)
         {
             MockConnection mock = new MockConnection();
@@ -130,7 +143,7 @@ namespace HTTPServer.test
 
         private string CommunicateWithServer200(Socket socket, byte[] bytesReturned)
         {
-            byte[] bytesToSend = Encoding.UTF8.GetBytes("GET / http/1.1\r\n");
+            byte[] bytesToSend = Encoding.UTF8.GetBytes("GET / HTTP/1.1\r\n");
             socket.Send(bytesToSend);
             var bytesReceived = socket.Receive(bytesReturned);
             var message = Encoding.UTF8.GetString(bytesReturned).Substring(0,bytesReceived);
@@ -139,7 +152,7 @@ namespace HTTPServer.test
 
         private string CommunicateWithServer404(Socket socket, byte[] bytesReturned)
         {
-            byte[] bytesToSend = Encoding.UTF8.GetBytes("GET /extension http/1.1\r\n");
+            byte[] bytesToSend = Encoding.UTF8.GetBytes("GET /extension HTTP/1.1\r\n");
             socket.Send(bytesToSend);
             var bytesReceived = socket.Receive(bytesReturned);
             var message = Encoding.UTF8.GetString(bytesReturned).Substring(0, bytesReceived);
