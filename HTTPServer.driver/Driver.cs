@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Text;
 using HTTPServer.core;
-using System.Net;
-using System.Net.Sockets;
 
 namespace HTTPServer.driver
 {
@@ -15,35 +12,23 @@ namespace HTTPServer.driver
         public static void Main(string[] args)
         {
             HandleCommands(args);
-            server.Start(port, new NetworkSocket(), directoryPath);
+            var info = new ServerInfo(port, new NetworkSocket(), new ConcreteDirectoryContents(directoryPath));
+            server.Start(info);
             server.HandleClients();
-
         }
 
         private static void HandleCommands(string[] args)
         {
-            if (args.Length == 2)
+            for (var i = 0; i < args.Length && args[i][0] == '-'; i++)
             {
-                if (args[0].Equals("-p"))
-                    port = Int32.Parse(args[1]);
-                else if (args[0].Equals("-d"))
+                switch (args[i][1])
                 {
-                    directoryPath = args[1];
-                }
-                else
-                    throw new Exception();
-            }
-            else if (args.Length == 4)
-            {
-                if (args[0].Equals("-p") && args[2].Equals("-d"))
-                {
-                    port = Int32.Parse(args[1]);
-                    directoryPath = args[3];
-                }
-                else if (args[0].Equals("-d") && args[2].Equals("-p"))
-                {
-                    port = Int32.Parse(args[3]);
-                    directoryPath = args[1];
+                    case 'p':
+                        port = Int32.Parse(args[i + 1]);
+                        break;
+                    case 'd':
+                        directoryPath = args[i + 1];
+                        break;
                 }
             }
         }
