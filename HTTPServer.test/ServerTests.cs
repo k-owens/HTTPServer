@@ -114,53 +114,17 @@ namespace HTTPServer.test
         public void ServerCanReturnFilesInDirectory()
         {
             TestResponse("GET / HTTP/1.1\r\n", "HTTP/1.1 200 OK\r\n" +
-                                               "Content-Length: 705\r\n" +
+                                               "Content-Length: 104\r\n" +
                                                "\r\n" +
-                                               "<html>\r\n" +
-                                               "<body>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\.git\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\.vs\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\HTTP Server.core\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\HTTPServer.driver\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\HTTPServer.run\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\HTTPServer.test\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\packages\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\TestResults\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\.gitattributes\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\.gitignore\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\HTTP Server.core.dll\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\HTTPServer.sln\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\server.config\r\n" +
-                                               "</p>\r\n" +
-                                               "<p>\r\n" +
-                                               "C:\\gitwork\\HTTP Server\\server.exe\r\n" +
-                                               "</p>\r\n" +
-                                               "</body>\r\n" +
+                                               "<html>" +
+                                               "<body>" +
+                                               "<p>" +
+                                               "C:\\gitwork\\HTTP Server\\.git" +
+                                               "</p>" +
+                                               "<p>" +
+                                               "C:\\gitwork\\HTTP Server\\.gitattributes" +
+                                               "</p>" +
+                                               "</body>" +
                                                "</html>", @"C:\gitwork\HTTP Server");
         }
 
