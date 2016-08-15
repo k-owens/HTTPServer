@@ -1,37 +1,36 @@
 ﻿using System;
-using System.Text;
 using HTTPServer.core;
-using System.Net;
-using System.Net.Sockets;
 
 namespace HTTPServer.driver
 {
     public class Driver
     {
         private static Server server = new Server();
+        private static int port = 0;
+        private static string directoryPath = "";
 
         public static void Main(string[] args)
         {
-            server.Start(HandlePort(args), new NetworkSocket());
+            HandleCommands(args);
+            var info = new ServerInfo(port, new NetworkSocket(), new ConcreteDirectoryContents(directoryPath));
+            server.Start(info);
             server.HandleClients();
-
         }
 
-        private static int HandlePort(string[] args)
+        private static void HandleCommands(string[] args)
         {
-            int port;
-            if (args.Length == 2)
+            for (var i = 0; i < args.Length && args[i][0] == '-'; i++)
             {
-                if (args[0].Equals("-p"))
-                    port = Int32.Parse(args[1]);
-                else
-                    throw new Exception();
+                switch (args[i][1])
+                {
+                    case 'p':
+                        port = Int32.Parse(args[i + 1]);
+                        break;
+                    case 'd':
+                        directoryPath = args[i + 1];
+                        break;
+                }
             }
-            else
-            {
-                port = 0;
-            }
-            return port;
         }
     }
 }
