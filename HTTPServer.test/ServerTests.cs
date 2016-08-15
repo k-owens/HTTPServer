@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
 using HTTPServer.core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Assert = Xunit.Assert;
@@ -16,7 +12,7 @@ namespace HTTPServer.test
     [TestClass]
     public class ServerUnitTests
     {
-        private Server server = new Server();
+        private readonly Server _server = new Server();
         private byte[] _bytesReturned;
         private IPAddress _ipAddress;
         private IPEndPoint _ipEndPoint;
@@ -25,19 +21,21 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStart()
         {
-            Assert.True(server.Start(8080, new NetworkSocket(), "") != null && server.Running);
-            server.Stop();
+            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockDirectoryContents(""));
+            Assert.True(_server.Start(info) != null);
+            _server.Stop();
         }
 
         [TestMethod]
         public void ServerCanStop()
         {
-            server.Start(8080, new NetworkSocket(), "");
-            Assert.True(server.Stop() && !server.Running);
+            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockDirectoryContents(""));
+            _server.Start(info);
+            Assert.True(_server.Stop());
         }
 
         [TestMethod]
-        public void ServerCanReturn200()
+        public void ServerCanReturn200Integration()
         {
             SetUpClient();
             var message = "";
@@ -63,7 +61,7 @@ namespace HTTPServer.test
         }
 
         [TestMethod]
-        public void ServerCanReturn404()
+        public void ServerCanReturn404Integration()
         {
             SetUpClient();
             var message = "";
@@ -116,6 +114,7 @@ namespace HTTPServer.test
         public void ServerCanReturnFilesInDirectory()
         {
             TestResponse("GET / HTTP/1.1\r\n", "HTTP/1.1 200 OK\r\n" +
+                                               "Content-Length: 705\r\n" +
                                                "\r\n" +
                                                "<html>\r\n" +
                                                "<body>\r\n" +
@@ -167,16 +166,17 @@ namespace HTTPServer.test
 
         private static void TestResponse(string request, string expectedReply, string directory)
         {
-            MockConnection mock = new MockConnection();
-            MockConnection serverConnection = new MockConnection();
-            Server testServer = new Server();
+            var mock = new MockConnection();
+            var serverConnection = new MockConnection();
+            var testServer = new Server();
             byte[] buffer = new byte[1024];
 
             mock.Send(Encoding.UTF8.GetBytes(request));
-            testServer.Start(0, serverConnection, directory);
-            testServer.ConnectToClient();
-            testServer.HandleData();
-            int bytesReceived = serverConnection.Receive(buffer);
+            var info = new ServerInfo(0, serverConnection, new MockDirectoryContents(directory));
+            testServer.Start(info);
+            testServer.ConnectClient();
+            RequestHandler.HandleData(mock, new MockDirectoryContents(directory));
+            var bytesReceived = serverConnection.Receive(buffer);
             Assert.Equal(expectedReply, Encoding.UTF8.GetString(buffer).Substring(0, bytesReceived));
         }
 
@@ -190,7 +190,7 @@ namespace HTTPServer.test
 
         private void CloseConnectionWithServer(Socket socket)
         {
-            server.Stop();
+            _server.Stop();
             socket.Close();
         }
 
@@ -214,9 +214,10 @@ namespace HTTPServer.test
 
         private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint)
         {
-            server.Start(8080, new NetworkSocket(), "");
+            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockDirectoryContents(""));
+            _server.Start(info);
             socket.Connect(ipEndPoint);
-            server.HandleClients();
+            _server.HandleClients();
         }
     }
 }
