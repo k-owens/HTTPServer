@@ -21,7 +21,7 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStart()
         {
-            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockDirectoryContents(""));
+            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockDirectoryContents(""), new MockFileContents());
             Assert.True(_server.Start(info) != null);
             _server.Stop();
         }
@@ -29,7 +29,7 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStop()
         {
-            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockDirectoryContents(""));
+            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockDirectoryContents(""), new MockFileContents());
             _server.Start(info);
             Assert.True(_server.Stop());
         }
@@ -128,6 +128,15 @@ namespace HTTPServer.test
                                                "</html>", @"C:\gitwork\HTTP Server");
         }
 
+        [TestMethod]
+        public void ServerCanReplyWithFileContents()
+        {
+            TestResponse("GET /.gitattributes HTTP/1.1\r\n", "HTTP/1.1 200 OK\r\n" +
+                                               "Content-Length: 32\r\n" +
+                                               "\r\n" +
+                                               "This is the content of the file.", @"C:\gitwork\HTTP Server");
+        }
+
         private static void TestResponse(string request, string expectedReply, string directory)
         {
             var mock = new MockConnection();
@@ -136,10 +145,10 @@ namespace HTTPServer.test
             byte[] buffer = new byte[1024];
 
             mock.Send(Encoding.UTF8.GetBytes(request));
-            var info = new ServerInfo(0, serverConnection, new MockDirectoryContents(directory));
+            var info = new ServerInfo(0, serverConnection, new MockDirectoryContents(directory), new MockFileContents());
             testServer.Start(info);
             testServer.ConnectClient();
-            RequestHandler.HandleData(mock, new MockDirectoryContents(directory));
+            RequestHandler.HandleData(mock, new MockDirectoryContents(directory), new MockFileContents());
             var bytesReceived = serverConnection.Receive(buffer);
             Assert.Equal(expectedReply, Encoding.UTF8.GetString(buffer).Substring(0, bytesReceived));
         }
@@ -178,7 +187,7 @@ namespace HTTPServer.test
 
         private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint)
         {
-            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockDirectoryContents(""));
+            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockDirectoryContents(""), new MockFileContents());
             _server.Start(info);
             socket.Connect(ipEndPoint);
             _server.HandleClients();
