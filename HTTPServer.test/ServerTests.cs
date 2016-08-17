@@ -137,6 +137,12 @@ namespace HTTPServer.test
                                                "This is the content of the file.", @"C:\gitwork\HTTP Server");
         }
 
+        [TestMethod]
+        public void ServerWillGive505ForBadVersion()
+        {
+            TestResponse("GET / HTTP/1.0\r\n","HTTP/1.1 505 HTTP Version Not Supported\r\n","");
+        }
+
         private static void TestResponse(string request, string expectedReply, string directory)
         {
             var mock = new MockConnection();
