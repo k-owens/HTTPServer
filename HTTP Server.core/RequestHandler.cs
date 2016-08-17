@@ -2,10 +2,10 @@
 {
     public static class RequestHandler
     {
-        public static void HandleData(ISocket clientConnection, IDirectoryContents directoryContents, IFileContents fileContents)
+        public static void HandleData(ISocket clientConnection, IPathContents _pathContents)
         {
             byte[] message = RequestReader.Read(clientConnection);
-            SendData(Reply.HandleReply(message, directoryContents, fileContents), clientConnection);
+            SendData(Reply.HandleReply(message, _pathContents), clientConnection);
         }
 
         private static int ReceiveData(byte[] buffer, ISocket clientConnection)

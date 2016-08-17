@@ -6,7 +6,7 @@ namespace HTTPServer.core
 {
     public static class Reply
     {
-        public static byte[] HandleReply(byte[] request, IDirectoryContents directoryContents, IFileContents fileContents)
+        public static byte[] HandleReply(byte[] request, IPathContents _pathContents)
         {
             var requestMessage = Encoding.UTF8.GetString(request).Substring(0, request.Length);
             var uri = "";
@@ -23,17 +23,17 @@ namespace HTTPServer.core
             }
             catch
             {
-                return CreateMessage("HTTP/1.1 400 Bad Request\r\n", directoryContents, uri, fileContents);
+                return CreateMessage("HTTP/1.1 400 Bad Request\r\n", _pathContents, uri);
             }
             if (IsValidVersionSection(version) && IsRequestMethod(method))
             {
-                if (IsRoot(uri) || IsValidFile(uri,directoryContents))
-                    return CreateMessage("HTTP/1.1 200 OK\r\n", directoryContents, uri, fileContents);
-                return CreateMessage("HTTP/1.1 404 Not Found\r\n", directoryContents, uri, fileContents);
+                if (IsRoot(uri) || IsValidFile(uri,_pathContents))
+                    return CreateMessage("HTTP/1.1 200 OK\r\n", _pathContents, uri);
+                return CreateMessage("HTTP/1.1 404 Not Found\r\n", _pathContents, uri);
             }
             if (!IsSupportedVersion(version))
-                return CreateMessage("HTTP/1.1 505 HTTP Version Not Supported\r\n", directoryContents, uri, fileContents);
-            return CreateMessage("HTTP/1.1 400 Bad Request\r\n", directoryContents, uri, fileContents);
+                return CreateMessage("HTTP/1.1 505 HTTP Version Not Supported\r\n", _pathContents, uri);
+            return CreateMessage("HTTP/1.1 400 Bad Request\r\n", _pathContents, uri);
         }
 
         private static bool IsValidVersionSection(string version)
@@ -51,14 +51,14 @@ namespace HTTPServer.core
             return uri.Equals("/");
         }
 
-        private static bool IsValidFile(string uri, IDirectoryContents directoryContents)
+        private static bool IsValidFile(string uri, IPathContents _pathContents)
         {
             try
             {
-                string[] files = directoryContents.GetFiles();
+                string[] files = _pathContents.GetFiles();
                 foreach (string file in files)
                 {
-                    var expectedFilePath = GetExpectedFilePath(uri, directoryContents);
+                    var expectedFilePath = GetExpectedFilePath(uri, _pathContents);
                     if ((expectedFilePath).Equals(file))
                         return true;
                 }
@@ -70,9 +70,9 @@ namespace HTTPServer.core
             }
         }
 
-        private static string GetExpectedFilePath(string uri, IDirectoryContents directoryContents)
+        private static string GetExpectedFilePath(string uri, IPathContents _pathContents)
         {
-            var expectedFilePath = directoryContents.DirectoryPath;
+            var expectedFilePath = _pathContents.DirectoryPath;
             expectedFilePath += "\\";
             expectedFilePath += uri.Substring(1);
             return expectedFilePath;
@@ -83,30 +83,30 @@ namespace HTTPServer.core
             return str.Equals("GET");
         }
 
-        public static byte[] CreateMessage(string httpStartLine, IDirectoryContents directoryContents, string uri, IFileContents fileContents)
+        public static byte[] CreateMessage(string httpStartLine, IPathContents _pathContents, string uri)
         {
-            if (directoryContents.DirectoryPath.Equals("") || !httpStartLine.Substring(9,3).Equals("200"))
+            if (_pathContents.DirectoryPath.Equals("") || !httpStartLine.Substring(9,3).Equals("200"))
                 return Encoding.UTF8.GetBytes(httpStartLine);
             var wholeMessage = httpStartLine;
             byte[] replyMessage;
             if (uri.Equals("/"))
             {
-                replyMessage = Encoding.UTF8.GetBytes(GetHtmlMessage(directoryContents, wholeMessage));
+                replyMessage = Encoding.UTF8.GetBytes(GetHtmlMessage(_pathContents, wholeMessage));
             }
             else
             {
-                replyMessage = GetContentsOfFile(directoryContents, uri, fileContents, wholeMessage); ;
+                replyMessage = GetContentsOfFile(_pathContents, uri, wholeMessage); ;
             }
             return replyMessage;
         }
 
-        private static byte[] GetContentsOfFile(IDirectoryContents directoryContents, string uri, IFileContents fileContents,
+        private static byte[] GetContentsOfFile(IPathContents _pathContents, string uri,
             string wholeMessage)
         {
-            string actualFilePath = directoryContents.DirectoryPath;
+            string actualFilePath = _pathContents.DirectoryPath;
             actualFilePath += "\\";
             actualFilePath += uri.Substring(1);
-            var bodyMessage = fileContents.GetFileContents(actualFilePath);
+            var bodyMessage = _pathContents.GetFileContents(actualFilePath);
             wholeMessage += "Content-Length: " + bodyMessage.Length + "\r\n";
             wholeMessage += "\r\n";
 
@@ -117,10 +117,10 @@ namespace HTTPServer.core
             return combinedMessage;
         }
 
-        private static string GetHtmlMessage(IDirectoryContents directoryContents, string wholeMessage)
+        private static string GetHtmlMessage(IPathContents _pathContents, string wholeMessage)
         {
-            string[] files = directoryContents.GetFiles();
-            string[] directories = directoryContents.GetDirectories();
+            string[] files = _pathContents.GetFiles();
+            string[] directories = _pathContents.GetDirectories();
             var bodyMessage = GetBodyOfMessage(directories, files);
             wholeMessage += "Content-Length: " + bodyMessage.Length + "\r\n";
             wholeMessage += "\r\n";
