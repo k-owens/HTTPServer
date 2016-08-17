@@ -25,13 +25,30 @@ namespace HTTPServer.core
             {
                 return CreateMessage("HTTP/1.1 400 Bad Request\r\n", directoryContents, uri, fileContents);
             }
-            if (version.Equals("HTTP/1.1\r\n") && IsRequestMethod(method))
+            if (IsValidVersionSection(version) && IsRequestMethod(method))
             {
-                if (uri.Equals("/") || IsValidFile(uri,directoryContents))
+                if (IsRoot(uri) || IsValidFile(uri,directoryContents))
                     return CreateMessage("HTTP/1.1 200 OK\r\n", directoryContents, uri, fileContents);
                 return CreateMessage("HTTP/1.1 404 Not Found\r\n", directoryContents, uri, fileContents);
             }
+            if (!IsSupportedVersion(version))
+                return CreateMessage("HTTP/1.1 505 HTTP Version Not Supported\r\n", directoryContents, uri, fileContents);
             return CreateMessage("HTTP/1.1 400 Bad Request\r\n", directoryContents, uri, fileContents);
+        }
+
+        private static bool IsValidVersionSection(string version)
+        {
+            return version.Equals("HTTP/1.1\r\n");
+        }
+
+        private static bool IsSupportedVersion(string version)
+        {
+            return version.Substring(version.Length - 5, 3).Equals("1.1");
+        }
+
+        private static bool IsRoot(string uri)
+        {
+            return uri.Equals("/");
         }
 
         private static bool IsValidFile(string uri, IDirectoryContents directoryContents)
