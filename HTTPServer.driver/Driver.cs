@@ -12,7 +12,7 @@ namespace HTTPServer.driver
         public static void Main(string[] args)
         {
             HandleCommands(args);
-            var info = new ServerInfo(port, new NetworkSocket(), new ConcretePathContents(directoryPath), new FileContents());
+            var info = new ServerInfo(port, new NetworkSocket(), new ConcretePathContents(directoryPath));
             server.Start(info);
             server.HandleClients();
         }
