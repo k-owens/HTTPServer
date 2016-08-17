@@ -1,12 +1,13 @@
-﻿using HTTPServer.core;
+﻿using System.Text;
+using HTTPServer.core;
 
 namespace HTTPServer.test
 {
-    public class MockDirectoryContents: IDirectoryContents
+    public class MockPathContents: IPathContents
     {
         public string DirectoryPath { get; }
 
-        public MockDirectoryContents(string directoryPath)
+        public MockPathContents(string directoryPath)
         {
             DirectoryPath = directoryPath;
         }
@@ -18,6 +19,11 @@ namespace HTTPServer.test
         public string[] GetDirectories()
         {
             return new []{ "C:\\gitwork\\HTTP Server\\.git" };
+        }
+
+        public byte[] GetFileContents(string filePath)
+        {
+            return Encoding.UTF8.GetBytes("This is the content of the file.");
         }
     }
 }

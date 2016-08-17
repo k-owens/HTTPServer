@@ -7,14 +7,12 @@ namespace HTTPServer.core
     {
         private ISocket socket;
         private ISocket clientConnection;
-        private IDirectoryContents directoryContents;
-        private IFileContents fileContents;
+        private IPathContents _pathContents;
 
         public Server Start(ServerInfo serverInfo)
         {
             socket = SocketConnector.SetupSocket(serverInfo);
-            directoryContents = serverInfo.DirectoryContents;
-            fileContents = serverInfo.FileContents;
+            _pathContents = serverInfo.PathContents;
             Console.WriteLine("Server has started at port " + ((IPEndPoint)socket.LocalEndPoint()).Port);
             return this;
         }
@@ -24,7 +22,7 @@ namespace HTTPServer.core
             while (true)
             {
                 ConnectClient();
-                RequestHandler.HandleData(clientConnection, directoryContents, fileContents);
+                RequestHandler.HandleData(clientConnection, _pathContents);
                 clientConnection.Close();
             }
         }

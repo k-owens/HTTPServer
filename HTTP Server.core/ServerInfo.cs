@@ -5,15 +5,13 @@
         public int Port { get; }
         public ISocket StartSocket { get; set; }
         public ISocket ClientConnection { get; set; }
-        public IDirectoryContents DirectoryContents { get; set; }
-        public IFileContents FileContents { get; set; }
+        public IPathContents PathContents { get; set; }
 
-        public ServerInfo(int port, ISocket startSocket, IDirectoryContents directoryContents, IFileContents fileContents)
+        public ServerInfo(int port, ISocket startSocket, IPathContents _pathContents)
         {
             Port = port;
             StartSocket = startSocket;
-            DirectoryContents = directoryContents;
-            FileContents = fileContents;
+            PathContents = _pathContents;
         }
     }
 }

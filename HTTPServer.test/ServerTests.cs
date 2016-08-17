@@ -21,7 +21,7 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStart()
         {
-            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockDirectoryContents(""), new MockFileContents());
+            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockPathContents(""));
             Assert.True(_server.Start(info) != null);
             _server.Stop();
         }
@@ -29,7 +29,7 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStop()
         {
-            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockDirectoryContents(""), new MockFileContents());
+            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockPathContents(""));
             _server.Start(info);
             Assert.True(_server.Stop());
         }
@@ -151,10 +151,10 @@ namespace HTTPServer.test
             byte[] buffer = new byte[1024];
 
             mock.Send(Encoding.UTF8.GetBytes(request));
-            var info = new ServerInfo(0, serverConnection, new MockDirectoryContents(directory), new MockFileContents());
+            var info = new ServerInfo(0, serverConnection, new MockPathContents(directory));
             testServer.Start(info);
             testServer.ConnectClient();
-            RequestHandler.HandleData(mock, new MockDirectoryContents(directory), new MockFileContents());
+            RequestHandler.HandleData(mock, new MockPathContents(directory));
             var bytesReceived = serverConnection.Receive(buffer);
             Assert.Equal(expectedReply, Encoding.UTF8.GetString(buffer).Substring(0, bytesReceived));
         }
@@ -193,7 +193,7 @@ namespace HTTPServer.test
 
         private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint)
         {
-            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockDirectoryContents(""), new MockFileContents());
+            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockPathContents(""));
             _server.Start(info);
             socket.Connect(ipEndPoint);
             _server.HandleClients();

@@ -40,10 +40,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientConnector.cs" />
-    <Compile Include="ConcreteDirectoryContents.cs" />
-    <Compile Include="FileContents.cs" />
-    <Compile Include="IDirectoryContents.cs" />
-    <Compile Include="IFileContents.cs" />
+    <Compile Include="ConcretePathContents.cs" />
+    <Compile Include="IPathContents.cs" />
     <Compile Include="ISocket.cs" />
     <Compile Include="NetworkSocket.cs" />
     <Compile Include="Reply.cs" />

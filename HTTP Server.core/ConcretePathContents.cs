@@ -2,11 +2,11 @@
 
 namespace HTTPServer.core
 {
-    public class ConcreteDirectoryContents: IDirectoryContents
+    public class ConcretePathContents: IPathContents
     {
         public string DirectoryPath { get; }
 
-        public ConcreteDirectoryContents(string directoryPath)
+        public ConcretePathContents(string directoryPath)
         {
             this.DirectoryPath = directoryPath;
         }
@@ -19,6 +19,10 @@ namespace HTTPServer.core
         public string[] GetDirectories()
         {
             return Directory.GetDirectories(DirectoryPath);
+        }
+        public byte[] GetFileContents(string filePath)
+        {
+            return System.IO.File.ReadAllBytes(filePath);
         }
     }
 }
