@@ -1,5 +1,6 @@
 ﻿using System;
 using HTTPServer.core;
+using System.Net.Sockets;
 
 namespace HTTPServer.driver
 {
@@ -12,7 +13,7 @@ namespace HTTPServer.driver
         public static void Main(string[] args)
         {
             HandleCommands(args);
-            var info = new ServerInfo(port, new NetworkSocket(), new ConcretePathContents(directoryPath));
+            var info = new ServerInfo(port, new ConcretePathContents(directoryPath));
             server.Start(info);
             server.HandleClients();
         }
