@@ -1,41 +1,103 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Net.Sockets;
 
 namespace HTTPServer.core
 {
     public class Server
     {
-        private ISocket socket;
-        private ISocket clientConnection;
+        private Socket _socket;
+        private Socket _clientConnection;
         private IPathContents _pathContents;
 
         public Server Start(ServerInfo serverInfo)
         {
-            socket = SocketConnector.SetupSocket(serverInfo);
+            SetupSocket(serverInfo);
             _pathContents = serverInfo.PathContents;
-            Console.WriteLine("Server has started at port " + ((IPEndPoint)socket.LocalEndPoint()).Port);
+            Console.WriteLine("Server has started at port " + ((IPEndPoint)_socket.LocalEndPoint).Port);
             return this;
+        }
+
+        private void SetupSocket(ServerInfo serverInfo)
+        {
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            var ipEndPoint = new IPEndPoint(IPAddress.Any, serverInfo.Port);
+            PrepareSocketForConnection(ipEndPoint);
+        }
+
+        private void PrepareSocketForConnection(IPEndPoint ipEndPoint)
+        {
+            _socket.Bind(ipEndPoint);
+            _socket.Listen(100);
         }
 
         public void HandleClients()
         {
             while (true)
             {
-                ConnectClient();
-                RequestHandler.HandleData(clientConnection, _pathContents);
-                clientConnection.Close();
+                _clientConnection = _socket.Accept();
+                RespondToClient();
+                _clientConnection.Close();
             }
         }
 
-        public void ConnectClient()
+        private void RespondToClient()
         {
-            clientConnection = ClientConnector.ConnectToClient(socket);
+            var requestHandler = new RequestHandler();
+            var reply = requestHandler.HandleData(Read(), _pathContents);
+            _clientConnection.Send(reply);
+        }
+
+        private byte[] Read()
+        {
+            var messageReceived = PullDataFromClient();
+            return FormatObtainedData(messageReceived);
+        }
+
+        private byte[] FormatObtainedData(List<byte> messageReceived)
+        {
+            byte[] message = new byte[messageReceived.Count];
+            for (var copyIndex = 0; copyIndex < messageReceived.Count; copyIndex++)
+                message[copyIndex] = messageReceived[copyIndex];
+            return message;
+        }
+
+        private List<byte> PullDataFromClient()
+        {
+            var messageReceived = new List<byte>();
+            while (true)
+            {
+                var bytesReceived = ReadKbOfData(messageReceived);
+                if (IsLessThanKb(bytesReceived))
+                    break;
+            }
+            return messageReceived;
+        }
+
+        private static bool IsLessThanKb(int bytesReceived)
+        {
+            return bytesReceived < 1024;
+        }
+
+        private int ReadKbOfData(List<byte> messageReceived)
+        {
+            var buffer = new byte[1024];
+            var bytesReceived = ReceiveData(buffer);
+            for (var bufferIndex = 0; bufferIndex < bytesReceived; bufferIndex++)
+                messageReceived.Add(buffer[bufferIndex]);
+            return bytesReceived;
+        }
+
+        private int ReceiveData(byte[] buffer)
+        {
+            return _clientConnection.Receive(buffer);
         }
 
         public bool Stop()
         {
-            socket?.Close();
-            clientConnection?.Close();
+            _socket?.Close();
+            _clientConnection?.Close();
             return true;
         }
     }
