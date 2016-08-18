@@ -13,7 +13,7 @@ namespace HTTPServer.test
         }
         public string[] GetFiles()
         {
-            return new []{ "C:\\gitwork\\HTTP Server\\.gitattributes" };
+            return new []{ "C:\\gitwork\\HTTP Server\\file.txt" };
         }
 
         public string[] GetDirectories()

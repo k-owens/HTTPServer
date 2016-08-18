@@ -21,7 +21,7 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStart()
         {
-            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockPathContents(""));
+            ServerInfo info = new ServerInfo(8080, new MockPathContents(""));
             Assert.True(_server.Start(info) != null);
             _server.Stop();
         }
@@ -29,7 +29,7 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStop()
         {
-            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockPathContents(""));
+            ServerInfo info = new ServerInfo(8080, new MockPathContents(""));
             _server.Start(info);
             Assert.True(_server.Stop());
         }
@@ -114,7 +114,7 @@ namespace HTTPServer.test
         public void ServerCanReturnFilesInDirectory()
         {
             TestResponse("GET / HTTP/1.1\r\n", "HTTP/1.1 200 OK\r\n" +
-                                               "Content-Length: 104\r\n" +
+                                               "Content-Length: 98\r\n" +
                                                "\r\n" +
                                                "<html>" +
                                                "<body>" +
@@ -122,7 +122,7 @@ namespace HTTPServer.test
                                                "C:\\gitwork\\HTTP Server\\.git" +
                                                "</p>" +
                                                "<p>" +
-                                               "C:\\gitwork\\HTTP Server\\.gitattributes" +
+                                               "C:\\gitwork\\HTTP Server\\file.txt" +
                                                "</p>" +
                                                "</body>" +
                                                "</html>", @"C:\gitwork\HTTP Server");
@@ -131,7 +131,7 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanReplyWithFileContents()
         {
-            TestResponse("GET /.gitattributes HTTP/1.1\r\n", "HTTP/1.1 200 OK\r\n" +
+            TestResponse("GET /file.txt HTTP/1.1\r\n", "HTTP/1.1 200 OK\r\n" +
                                                "Content-Length: 32\r\n" +
                                                "\r\n" +
                                                "This is the content of the file.", @"C:\gitwork\HTTP Server");
@@ -145,18 +145,10 @@ namespace HTTPServer.test
 
         private static void TestResponse(string request, string expectedReply, string directory)
         {
-            var mock = new MockConnection();
-            var serverConnection = new MockConnection();
-            var testServer = new Server();
-            byte[] buffer = new byte[1024];
-
-            mock.Send(Encoding.UTF8.GetBytes(request));
-            var info = new ServerInfo(0, serverConnection, new MockPathContents(directory));
-            testServer.Start(info);
-            testServer.ConnectClient();
-            RequestHandler.HandleData(mock, new MockPathContents(directory));
-            var bytesReceived = serverConnection.Receive(buffer);
-            Assert.Equal(expectedReply, Encoding.UTF8.GetString(buffer).Substring(0, bytesReceived));
+            var requestHandler = new RequestHandler();
+            byte[] requestMessage = Encoding.UTF8.GetBytes(request);
+            byte[] replyMessage = requestHandler.HandleData(requestMessage, new MockPathContents(directory));
+            Assert.Equal(expectedReply, Encoding.UTF8.GetString(replyMessage));
         }
 
         private void SetUpClient()
@@ -193,7 +185,7 @@ namespace HTTPServer.test
 
         private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint)
         {
-            ServerInfo info = new ServerInfo(8080, new NetworkSocket(), new MockPathContents(""));
+            ServerInfo info = new ServerInfo(8080, new MockPathContents(""));
             _server.Start(info);
             socket.Connect(ipEndPoint);
             _server.HandleClients();

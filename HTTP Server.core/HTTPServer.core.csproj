@@ -39,16 +39,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientConnector.cs" />
     <Compile Include="ConcretePathContents.cs" />
     <Compile Include="IPathContents.cs" />
-    <Compile Include="ISocket.cs" />
-    <Compile Include="NetworkSocket.cs" />
     <Compile Include="Reply.cs" />
     <Compile Include="RequestHandler.cs" />
-    <Compile Include="RequestReader.cs" />
     <Compile Include="Server.cs" />
-    <Compile Include="SocketConnector.cs" />
     <Compile Include="ServerInfo.cs" />
   </ItemGroup>
   <ItemGroup>
