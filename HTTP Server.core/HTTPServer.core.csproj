@@ -40,8 +40,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConcretePathContents.cs" />
+    <Compile Include="GetDirectoryContents.cs" />
+    <Compile Include="GetFileContents.cs" />
+    <Compile Include="IFunctionality.cs" />
     <Compile Include="IPathContents.cs" />
-    <Compile Include="Reply.cs" />
+    <Compile Include="PostContents.cs" />
+    <Compile Include="Request.cs" />
     <Compile Include="RequestHandler.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="ServerInfo.cs" />

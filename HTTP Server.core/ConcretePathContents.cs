@@ -24,5 +24,10 @@ namespace HTTPServer.core
         {
             return System.IO.File.ReadAllBytes(filePath);
         }
+
+        public void PostContents(Request request)
+        {
+            System.IO.File.AppendAllText(DirectoryPath + "\\" + request.Uri.Substring(1), request.Body);
+        }
     }
 }
