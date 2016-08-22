@@ -1,6 +1,6 @@
 ﻿namespace HTTPServer.core
 {
-    public interface IFunctionality
+    public interface IHttpHandler
     {
         byte[] Execute(Request request);
         bool ShouldRun(Request request, IPathContents pathContents);

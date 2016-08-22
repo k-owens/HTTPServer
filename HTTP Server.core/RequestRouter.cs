@@ -4,12 +4,12 @@ using System.Text;
 
 namespace HTTPServer.core
 {
-    public class RequestHandler
+    public class RequestRouter
     {
         private Request _request;
-        private List<IFunctionality> _actions = new List<IFunctionality>();
+        private List<IHttpHandler> _actions = new List<IHttpHandler>();
 
-        public void AddAction(IFunctionality function)
+        public void AddAction(IHttpHandler function)
         {
             _actions.Add(function);
         }

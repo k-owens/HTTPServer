@@ -1,40 +1,50 @@
-﻿ namespace HTTPServer.core
+﻿ using System.Text;
+
+namespace HTTPServer.core
 {
     public class Request
     {
-        public string EntireMessage { get; }
         public string HttpVersion { get; }
         public  string Uri { get; }
         public  string Method { get; }
-        public string Body { get; }
+        public byte[] Body { get; }
 
-        public Request(string requestMessage)
+        public Request(byte[] requestMessage)
         {
-            EntireMessage = requestMessage;
             if (requestMessage.Equals(""))
             {
                 Method = "";
                 Uri = "";
                 HttpVersion = "";
-                Body = "";
+                Body = new byte[0];
             }
             else
             {
-                var endIndexOfFirstLine = requestMessage.IndexOf('\n');
-                var firstLine = requestMessage.Substring(0, endIndexOfFirstLine + 1);
+                var endIndexOfFirstLine = Encoding.UTF8.GetString(requestMessage).IndexOf('\n');
+                var firstLine = Encoding.UTF8.GetString(requestMessage).Substring(0, endIndexOfFirstLine + 1);
                 var requestLine = firstLine.Split(' ', ' ');
                 Method = requestLine[0];
                 Uri = requestLine[1];
                 HttpVersion = requestLine[2];
-                int index = requestMessage.IndexOf("\r\n\r\n");
+                var index = Encoding.UTF8.GetString(requestMessage).IndexOf("\r\n\r\n");
                 if (index == -1)
-                    Body = "";
+                    Body = new byte[0];
                 else
                 {
-                    string testBody = requestMessage.Substring(index + 4);
-                    Body = testBody;
+                    Body = GetBodyOfMessage(index, requestMessage);
                 }
             }
+        }
+
+        private byte[] GetBodyOfMessage(int startIndex, byte[] message)
+        {
+            var body = new byte[message.Length - startIndex];
+            for (var index = startIndex; index < message.Length-1; index++)
+            {
+                body[index-startIndex] = message[index];
+            }
+
+            return body;
         }
     }
 }

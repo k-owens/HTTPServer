@@ -2,7 +2,7 @@
 
 namespace HTTPServer.core
 {
-    public class PostContents : IFunctionality
+    public class PostContents : IHttpHandler
     {
         private IPathContents _pathContents;
 

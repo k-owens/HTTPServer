@@ -2,7 +2,7 @@
 
 namespace HTTPServer.core
 {
-    public class GetDirectoryContents : IFunctionality
+    public class GetDirectoryContents : IHttpHandler
     {
         private IPathContents _directoryContents;
 

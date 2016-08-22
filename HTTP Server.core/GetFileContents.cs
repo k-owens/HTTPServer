@@ -3,7 +3,7 @@ using System.Text;
 
 namespace HTTPServer.core
 {
-    public class GetFileContents : IFunctionality
+    public class GetFileContents : IHttpHandler
     {
         private IPathContents _fileContents;
 

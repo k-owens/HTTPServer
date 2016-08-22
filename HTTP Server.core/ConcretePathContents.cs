@@ -27,7 +27,7 @@ namespace HTTPServer.core
 
         public void PostContents(Request request)
         {
-            System.IO.File.AppendAllText(DirectoryPath + "\\" + request.Uri.Substring(1), request.Body);
+            //System.IO.File.AppendAllText(DirectoryPath + "\\" + request.Uri.Substring(1), request.Body);
         }
     }
 }

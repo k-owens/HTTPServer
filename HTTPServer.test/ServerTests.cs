@@ -21,8 +21,8 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStart()
         {
-            RequestHandler requestHandler = AddFunctionality();
-            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestHandler);
+            RequestRouter requestRouter = AddFunctionality();
+            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
             Assert.True(_server.Start(info) != null);
             _server.Stop();
         }
@@ -30,8 +30,8 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStop()
         {
-            RequestHandler requestHandler = AddFunctionality();
-            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestHandler);
+            RequestRouter requestRouter = AddFunctionality();
+            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
             _server.Start(info);
             Assert.True(_server.Stop());
         }
@@ -135,20 +135,21 @@ namespace HTTPServer.test
             TestResponse("POST /file.txt HTTP/1.1\r\n\r\nThis will be in the file.", "HTTP/1.1 201 Created\r\n", @"C:\gitwork\HTTP Server");
         }
 
-        private static RequestHandler AddFunctionality()
+        private static RequestRouter AddFunctionality()
         {
             MockPathContents pathContents = new MockPathContents(@"C:\gitwork\HTTP Server");
-            RequestHandler requestHandler = new RequestHandler();
-            requestHandler.AddAction(new GetDirectoryContents(pathContents));
-            requestHandler.AddAction(new GetFileContents(pathContents));
-            requestHandler.AddAction(new PostContents(pathContents));
-            return requestHandler;
+            RequestRouter requestRouter = new RequestRouter();
+            requestRouter.AddAction(new GetDirectoryContents(pathContents));
+            requestRouter.AddAction(new GetFileContents(pathContents));
+            requestRouter.AddAction(new PostContents(pathContents));
+            return requestRouter;
         }
 
         private static void TestResponse(string requestMessage, string expectedReply, string directory)
         {
             var requestHandler = AddFunctionality();
-            var request = new Request(requestMessage);
+            var byteRequestMessage = Encoding.UTF8.GetBytes(requestMessage);
+            var request = new Request(byteRequestMessage);
             var replyMessage = requestHandler.HandleData(request, new MockPathContents(directory));
             Assert.Equal(expectedReply, Encoding.UTF8.GetString(replyMessage));
         }
@@ -178,8 +179,8 @@ namespace HTTPServer.test
 
         private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint)
         {
-            RequestHandler requestHandler = AddFunctionality();
-            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestHandler);
+            RequestRouter requestRouter = AddFunctionality();
+            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
             _server.Start(info);
             socket.Connect(ipEndPoint);
             _server.HandleClients();

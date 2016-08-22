@@ -36,10 +36,10 @@ namespace HTTPServer.driver
             }
         }
 
-        private static RequestHandler AddFunctionality()
+        private static RequestRouter AddFunctionality()
         {
             var pathContents = new ConcretePathContents(directoryPath);
-            var requestHandler = new RequestHandler();
+            var requestHandler = new RequestRouter();
             requestHandler.AddAction(new GetDirectoryContents(pathContents));
             requestHandler.AddAction(new GetFileContents(pathContents));
             return requestHandler;
