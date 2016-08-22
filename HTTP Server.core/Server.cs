@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Remoting.Messaging;
+using System.Text;
+using HTTP_Server.core;
 
 namespace HTTPServer.core
 {
@@ -10,11 +13,13 @@ namespace HTTPServer.core
         private Socket _socket;
         private Socket _clientConnection;
         private IPathContents _pathContents;
+        private RequestRouter _requestRouter;
 
         public Server Start(ServerInfo serverInfo)
         {
             SetupSocket(serverInfo);
             _pathContents = serverInfo.PathContents;
+            _requestRouter = serverInfo.ServerRequestRouter;
             Console.WriteLine("Server has started at port " + ((IPEndPoint)_socket.LocalEndPoint).Port);
             return this;
         }
@@ -44,10 +49,20 @@ namespace HTTPServer.core
 
         private void RespondToClient()
         {
-            var requestHandler = new RequestHandler();
-            var reply = requestHandler.HandleData(Read(), _pathContents);
+            byte[] clientMessage = Read();
+            Request request= new Request(clientMessage);
+            byte[] reply = GetReply(request);
             _clientConnection.Send(reply);
         }
+
+        private byte[] GetReply(Request request)
+        {
+            var error = new ErrorMessage();
+            if (error.ShouldRun(request,_pathContents))
+                return error.Execute(request);
+            return _requestRouter.HandleData(request, _pathContents);
+        }
+
 
         private byte[] Read()
         {
@@ -57,7 +72,7 @@ namespace HTTPServer.core
 
         private byte[] FormatObtainedData(List<byte> messageReceived)
         {
-            byte[] message = new byte[messageReceived.Count];
+            var message = new byte[messageReceived.Count];
             for (var copyIndex = 0; copyIndex < messageReceived.Count; copyIndex++)
                 message[copyIndex] = messageReceived[copyIndex];
             return message;

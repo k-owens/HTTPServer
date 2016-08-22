@@ -6,6 +6,6 @@
         string[] GetFiles();
         string[] GetDirectories();
         byte[] GetFileContents(string filePath);
-
+        void PostContents(Request request);
     }
 }

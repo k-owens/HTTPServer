@@ -25,5 +25,10 @@ namespace HTTPServer.test
         {
             return Encoding.UTF8.GetBytes("This is the content of the file.");
         }
+
+        public void PostContents(Request request)
+        {
+            
+        }
     }
 }

@@ -21,7 +21,8 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStart()
         {
-            ServerInfo info = new ServerInfo(8080, new MockPathContents(""));
+            RequestRouter requestRouter = AddFunctionality();
+            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
             Assert.True(_server.Start(info) != null);
             _server.Stop();
         }
@@ -29,7 +30,8 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanStop()
         {
-            ServerInfo info = new ServerInfo(8080, new MockPathContents(""));
+            RequestRouter requestRouter = AddFunctionality();
+            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
             _server.Start(info);
             Assert.True(_server.Stop());
         }
@@ -37,17 +39,30 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanReturn200Integration()
         {
+            var message = IntegrationRun("GET / HTTP/1.1\r\n");
+            Assert.Equal("HTTP/1.1 200 OK\r\n" +
+                                               "Content-Length: 98\r\n" +
+                                               "\r\n" +
+                                               "<html>" +
+                                               "<body>" +
+                                               "<p>" +
+                                               "C:\\gitwork\\HTTP Server\\.git" +
+                                               "</p>" +
+                                               "<p>" +
+                                               "C:\\gitwork\\HTTP Server\\file.txt" +
+                                               "</p>" +
+                                               "</body>" +
+                                               "</html>", message);
+        }
+
+        private string IntegrationRun(string sentMessage)
+        {
             SetUpClient();
             var message = "";
-            Action<object> action1 = (object obj) =>
-            {
-                ConnectClientToServer(_socket, _ipEndPoint);
-            };
+            Action<object> action1 = (object obj) => { ConnectClientToServer(_socket, _ipEndPoint); };
 
-            Action<object> action2 = (object obj) =>
-            {
-                message = CommunicateWithServer200(_socket, _bytesReturned);
-            };
+            Action<object> action2 =
+                (object obj) => { message = CommunicateWithServer(_socket, _bytesReturned, sentMessage); };
 
             Task t1 = new Task(action1, "");
             Task t2 = new Task(action2, "");
@@ -57,39 +72,14 @@ namespace HTTPServer.test
             t2.Start();
             t2.Wait();
             CloseConnectionWithServer(_socket);
-            Assert.Equal("HTTP/1.1 200 OK\r\n", message);
+            return message;
         }
 
         [TestMethod]
         public void ServerCanReturn404Integration()
         {
-            SetUpClient();
-            var message = "";
-            Action<object> action1 = (object obj) =>
-            {
-                ConnectClientToServer(_socket, _ipEndPoint);
-            };
-
-            Action<object> action2 = (object obj) =>
-            {
-                message = CommunicateWithServer404(_socket, _bytesReturned);
-            };
-
-            Task t1 = new Task(action1, "");
-            Task t2 = new Task(action2, "");
-
-            t1.Start();
-            System.Threading.Thread.Sleep(100);
-            t2.Start();
-            t2.Wait();
-            CloseConnectionWithServer(_socket);
+            var message = IntegrationRun("GET /extension HTTP/1.1\r\n");
             Assert.Equal("HTTP/1.1 404 Not Found\r\n", message);
-        }
-
-        [TestMethod]
-        public void ServerCanReply200()
-        {
-            TestResponse("GET / HTTP/1.1\r\n", "HTTP/1.1 200 OK\r\n","");
         }
 
         [TestMethod]
@@ -101,13 +91,8 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerWillGive400ForMalformedRequests()
         {
-            TestResponse("GET / http/1.1\r\n", "HTTP/1.1 400 Bad Request\r\n","");
-        }
-
-        [TestMethod]
-        public void ServerWillGive400ForWrongVersion()
-        {
-            TestResponse("GET / HTTP/1.0", "HTTP/1.1 400 Bad Request\r\n","");
+            var message = IntegrationRun("GET / http/1.1\r\n");
+            Assert.Equal("HTTP/1.1 400 Bad Request\r\n", message);
         }
 
         [TestMethod]
@@ -140,14 +125,32 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerWillGive505ForBadVersion()
         {
-            TestResponse("GET / HTTP/1.0\r\n","HTTP/1.1 505 HTTP Version Not Supported\r\n","");
+            var message = IntegrationRun("GET / HTTP/1.0\r\n");
+            Assert.Equal("HTTP/1.1 505 HTTP Version Not Supported\r\n", message);
         }
 
-        private static void TestResponse(string request, string expectedReply, string directory)
+        [TestMethod]
+        public void ServerWillRespondToPost()
         {
-            var requestHandler = new RequestHandler();
-            byte[] requestMessage = Encoding.UTF8.GetBytes(request);
-            byte[] replyMessage = requestHandler.HandleData(requestMessage, new MockPathContents(directory));
+            TestResponse("POST /file.txt HTTP/1.1\r\n\r\nThis will be in the file.", "HTTP/1.1 201 Created\r\n", @"C:\gitwork\HTTP Server");
+        }
+
+        private static RequestRouter AddFunctionality()
+        {
+            MockPathContents pathContents = new MockPathContents(@"C:\gitwork\HTTP Server");
+            RequestRouter requestRouter = new RequestRouter();
+            requestRouter.AddAction(new GetDirectoryContents(pathContents));
+            requestRouter.AddAction(new GetFileContents(pathContents));
+            requestRouter.AddAction(new PostContents(pathContents));
+            return requestRouter;
+        }
+
+        private static void TestResponse(string requestMessage, string expectedReply, string directory)
+        {
+            var requestHandler = AddFunctionality();
+            var byteRequestMessage = Encoding.UTF8.GetBytes(requestMessage);
+            var request = new Request(byteRequestMessage);
+            var replyMessage = requestHandler.HandleData(request, new MockPathContents(directory));
             Assert.Equal(expectedReply, Encoding.UTF8.GetString(replyMessage));
         }
 
@@ -165,18 +168,9 @@ namespace HTTPServer.test
             socket.Close();
         }
 
-        private string CommunicateWithServer200(Socket socket, byte[] bytesReturned)
+        private string CommunicateWithServer(Socket socket, byte[] bytesReturned, string incomingMessage)
         {
-            byte[] bytesToSend = Encoding.UTF8.GetBytes("GET / HTTP/1.1\r\n");
-            socket.Send(bytesToSend);
-            var bytesReceived = socket.Receive(bytesReturned);
-            var message = Encoding.UTF8.GetString(bytesReturned).Substring(0,bytesReceived);
-            return message;
-        }
-
-        private string CommunicateWithServer404(Socket socket, byte[] bytesReturned)
-        {
-            byte[] bytesToSend = Encoding.UTF8.GetBytes("GET /extension HTTP/1.1\r\n");
+            byte[] bytesToSend = Encoding.UTF8.GetBytes(incomingMessage);
             socket.Send(bytesToSend);
             var bytesReceived = socket.Receive(bytesReturned);
             var message = Encoding.UTF8.GetString(bytesReturned).Substring(0, bytesReceived);
@@ -185,7 +179,8 @@ namespace HTTPServer.test
 
         private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint)
         {
-            ServerInfo info = new ServerInfo(8080, new MockPathContents(""));
+            RequestRouter requestRouter = AddFunctionality();
+            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
             _server.Start(info);
             socket.Connect(ipEndPoint);
             _server.HandleClients();

@@ -12,8 +12,10 @@ namespace HTTPServer.driver
 
         public static void Main(string[] args)
         {
+            
             HandleCommands(args);
-            var info = new ServerInfo(port, new ConcretePathContents(directoryPath));
+            var requestHandler = AddFunctionality();
+            var info = new ServerInfo(port, new ConcretePathContents(directoryPath), requestHandler);
             server.Start(info);
             server.HandleClients();
         }
@@ -32,6 +34,15 @@ namespace HTTPServer.driver
                         break;
                 }
             }
+        }
+
+        private static RequestRouter AddFunctionality()
+        {
+            var pathContents = new ConcretePathContents(directoryPath);
+            var requestHandler = new RequestRouter();
+            requestHandler.AddAction(new GetDirectoryContents(pathContents));
+            requestHandler.AddAction(new GetFileContents(pathContents));
+            return requestHandler;
         }
     }
 }
