@@ -135,6 +135,17 @@ namespace HTTPServer.test
             TestResponse("POST /file.txt HTTP/1.1\r\n\r\nThis will be in the file.", "HTTP/1.1 201 Created\r\n", @"C:\gitwork\HTTP Server");
         }
 
+        [TestMethod]
+        public void CanGetPartialContents()
+        {
+            TestResponse("GET /file.txt HTTP/1.1\r\n" +
+                         "Range: bytes=0-10\r\n\r\n", "HTTP/1.1 206 Partial Content\r\n" +
+                                               "Content-Length: 11\r\n" +
+                                               "Content-Range: bytes 0-10\r\n" +
+                                               "\r\n" +
+                                               "This is the", @"C:\gitwork\HTTP Server");
+        }
+
         private static RequestRouter AddFunctionality()
         {
             MockPathContents pathContents = new MockPathContents(@"C:\gitwork\HTTP Server");

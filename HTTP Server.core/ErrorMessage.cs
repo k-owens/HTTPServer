@@ -18,7 +18,7 @@ namespace HTTP_Server.core
 
         public bool ShouldRun(Request request, IPathContents pathContents)
         {
-            return !IsValidMethod(request) || !request.HttpVersion.Equals("HTTP/1.1\r\n");
+            return !IsValidMethod(request) || !request.HttpVersion.Equals("HTTP/1.1");
         }
         
         private static bool IsValidMethod(Request request)
