@@ -42,6 +42,7 @@ namespace HTTPServer.driver
             var requestHandler = new RequestRouter();
             requestHandler.AddAction(new GetDirectoryContents(pathContents));
             requestHandler.AddAction(new GetFileContents(pathContents));
+            requestHandler.AddAction(new PostContents(pathContents));
             return requestHandler;
         }
     }
