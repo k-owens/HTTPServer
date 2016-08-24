@@ -12,28 +12,28 @@ namespace HTTPServer.test
     [TestClass]
     public class ServerUnitTests
     {
-        private readonly Server _server = new Server();
         private byte[] _bytesReturned;
         private IPAddress _ipAddress;
         private IPEndPoint _ipEndPoint;
-        private Socket _socket;
 
         [TestMethod]
         public void ServerCanStart()
         {
+            Server server = new Server();
             RequestRouter requestRouter = AddFunctionality();
             ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
-            Assert.True(_server.Start(info) != null);
-            _server.Stop();
+            Assert.True(server.Start(info) != null);
+            server.Stop();
         }
 
         [TestMethod]
         public void ServerCanStop()
         {
+            Server server = new Server();
             RequestRouter requestRouter = AddFunctionality();
             ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
-            _server.Start(info);
-            Assert.True(_server.Stop());
+            server.Start(info);
+            Assert.True(server.Stop());
         }
 
         [TestMethod]
@@ -57,12 +57,13 @@ namespace HTTPServer.test
 
         private string IntegrationRun(string sentMessage)
         {
-            SetUpClient();
+            Socket socket = SetUpClient();
+            Server server = new Server();
             var message = "";
-            Action<object> action1 = (object obj) => { ConnectClientToServer(_socket, _ipEndPoint); };
+            Action<object> action1 = (object obj) => { ConnectClientToServer(socket, _ipEndPoint, server); };
 
             Action<object> action2 =
-                (object obj) => { message = CommunicateWithServer(_socket, _bytesReturned, sentMessage); };
+                (object obj) => { message = CommunicateWithServer(socket, _bytesReturned, sentMessage); };
 
             Task t1 = new Task(action1, "");
             Task t2 = new Task(action2, "");
@@ -71,7 +72,7 @@ namespace HTTPServer.test
             System.Threading.Thread.Sleep(100);
             t2.Start();
             t2.Wait();
-            CloseConnectionWithServer(_socket);
+            CloseConnectionWithServer(socket,server);
             return message;
         }
 
@@ -165,17 +166,18 @@ namespace HTTPServer.test
             Assert.Equal(expectedReply, Encoding.UTF8.GetString(replyMessage));
         }
 
-        private void SetUpClient()
+        private Socket SetUpClient()
         {
             _bytesReturned = new byte[1024];
             _ipAddress = IPAddress.Parse("127.0.0.1");
             _ipEndPoint = new IPEndPoint(_ipAddress, 8080);
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            return new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
 
-        private void CloseConnectionWithServer(Socket socket)
+        private void CloseConnectionWithServer(Socket socket, Server server)
         {
-            _server.Stop();
+           // socket.Close();
+            server.Stop();
             socket.Close();
         }
 
@@ -188,13 +190,13 @@ namespace HTTPServer.test
             return message;
         }
 
-        private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint)
+        private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint, Server server)
         {
             RequestRouter requestRouter = AddFunctionality();
             ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
-            _server.Start(info);
+            server.Start(info);
             socket.Connect(ipEndPoint);
-            _server.HandleClients();
+            server.HandleClients();
         }
     }
 }
