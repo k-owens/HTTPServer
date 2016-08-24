@@ -8,7 +8,7 @@ namespace HTTPServer.core
 
         public ConcretePathContents(string directoryPath)
         {
-            this.DirectoryPath = directoryPath;
+            DirectoryPath = directoryPath;
         }
 
         public string[] GetFiles()
@@ -27,7 +27,7 @@ namespace HTTPServer.core
 
         public void PostContents(Request request)
         {
-            //System.IO.File.AppendAllText(DirectoryPath + "\\" + request.Uri.Substring(1), request.Body);
+            System.IO.File.WriteAllBytes(DirectoryPath + "\\" + request.Uri.Substring(1), request.Body);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace HTTPServer.core
 {
@@ -33,7 +34,15 @@ namespace HTTPServer.core
 
         private byte[] ObtainDirectoryContents()
         {
-            var bodyMessage = GetBodyOfMessage(_directoryContents.GetDirectories(), _directoryContents.GetFiles());
+            string bodyMessage;
+            try
+            {
+                bodyMessage = GetBodyOfMessage(_directoryContents.GetDirectories(), _directoryContents.GetFiles());
+            }
+            catch
+            {
+                bodyMessage = "";
+            }
             var wholeMessage = "HTTP/1.1 200 OK\r\n" + "Content-Length: " + 
                 bodyMessage.Length + "\r\n\r\n" + bodyMessage;
             return Encoding.UTF8.GetBytes(wholeMessage);

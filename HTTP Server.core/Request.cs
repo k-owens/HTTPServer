@@ -34,14 +34,14 @@ namespace HTTPServer.core
                 if (index == -1)
                     Body = new byte[0];
                 else
-                    Body = GetBodyOfMessage(index, requestMessage);
+                    Body = GetBodyOfMessage(index+4, requestMessage);
             }
         }
 
         private byte[] GetBodyOfMessage(int startIndex, byte[] message)
         {
             var body = new byte[message.Length - startIndex];
-            for (var index = startIndex; index < message.Length-1; index++)
+            for (var index = startIndex; index < message.Length; index++)
             {
                 body[index-startIndex] = message[index];
             }
