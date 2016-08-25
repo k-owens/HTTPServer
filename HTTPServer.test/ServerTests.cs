@@ -133,7 +133,7 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerWillRespondToPost()
         {
-            TestResponse("POST /file.txt HTTP/1.1\r\n\r\nThis will be in the file.", "HTTP/1.1 201 Created\r\n", @"C:\gitwork\HTTP Server");
+            TestResponse("POST /fileExample.txt HTTP/1.1\r\n\r\nThis will be in the file.", "HTTP/1.1 201 Created\r\n", @"C:\gitwork\HTTP Server");
         }
 
         [TestMethod]
