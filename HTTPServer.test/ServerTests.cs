@@ -147,6 +147,16 @@ namespace HTTPServer.test
                                                "This is the", @"C:\gitwork\HTTP Server");
         }
 
+        [TestMethod]
+        public void RequestsCanBeLogged()
+        {
+                var requestMessage = Encoding.UTF8.GetBytes("GET /extension.txt HTTP/1.1\r\n");
+                Request request = new Request(requestMessage);
+                var response = Encoding.UTF8.GetBytes("HTTP/1.1 404 Not Found\r\n");
+                var logMessage = request.LogRequest(response, "127.0.0.1",DateTime.Today);
+                Assert.Equal("127.0.0.1 " + DateTime.Today + " GET /extension.txt HTTP/1.1 404\r\n", logMessage);
+        }
+
         private static RequestRouter AddFunctionality()
         {
             MockPathContents pathContents = new MockPathContents(@"C:\gitwork\HTTP Server");
@@ -176,7 +186,6 @@ namespace HTTPServer.test
 
         private void CloseConnectionWithServer(Socket socket, Server server)
         {
-           // socket.Close();
             server.Stop();
             socket.Close();
         }

@@ -49,9 +49,12 @@ namespace HTTPServer.core
 
         private void RespondToClient()
         {
+            string ipAddress = ((IPEndPoint)_clientConnection.RemoteEndPoint).Address.ToString();
             byte[] clientMessage = Read();
             Request request= new Request(clientMessage);
             byte[] reply = GetReply(request);
+            var loggedMessage = request.LogRequest(reply, ipAddress, DateTime.Now);
+            System.IO.File.AppendAllText("../logs.txt", loggedMessage);
             _clientConnection.Send(reply);
         }
 
