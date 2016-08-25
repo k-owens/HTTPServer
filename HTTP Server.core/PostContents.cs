@@ -23,8 +23,46 @@ namespace HTTPServer.core
 
         private byte[] Post(Request request)
         {
-            _pathContents.PostContents(request);
-            return Encoding.UTF8.GetBytes("HTTP/1.1 201 Created\r\n");
+            if (!IsValidFile(request.Uri, _pathContents))
+            {
+                try
+                {
+                    _pathContents.PostContents(request);
+                    return Encoding.UTF8.GetBytes("HTTP/1.1 201 Created\r\n");
+                }
+                catch
+                {
+                    return Encoding.UTF8.GetBytes("HTTP/1.1 400 Bad Request\r\n");
+                }
+            }
+            else
+                return Encoding.UTF8.GetBytes("HTTP/1.1 409 Conflict\r\n");
+        }
+
+        private bool IsValidFile(string uri, IPathContents pathContents)
+        {
+            try
+            {
+                var files = pathContents.GetFiles();
+                foreach (string file in files)
+                {
+                    var expectedFilePath = GetExpectedFilePath(uri, pathContents);
+                    if (expectedFilePath.Equals(file))
+                        return true;
+                }
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        private string GetExpectedFilePath(string uri, IPathContents pathContents)
+        {
+            var expectedFilePath = pathContents.DirectoryPath;
+            expectedFilePath += "\\";
+            expectedFilePath += uri.Substring(1);
+            return expectedFilePath;
         }
     }
 }
