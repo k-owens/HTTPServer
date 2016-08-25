@@ -14,10 +14,22 @@ namespace HTTPServer.core
         }
 
         public byte[] Execute(Request request)
-        { 
+        {
+            if (request.Uri.Equals("/logs"))
+                return GetLogContents();
             if (IsValidFile(request.Uri, _fileContents))           
                 return ObtainFileContents(request);
             return Encoding.UTF8.GetBytes("HTTP/1.1 404 Not Found\r\n");
+        }
+
+        private byte[] GetLogContents()
+        {
+            var bodyMessage = _fileContents.GetFileContents("../logs.txt");
+            var messageHeaders = "HTTP/1.1 200 OK\r\n" + "Content-Length: " + bodyMessage.Length + "\r\n\r\n";
+            var headerBytes = Encoding.UTF8.GetBytes(messageHeaders);
+            var combinedMessage = new byte[headerBytes.Length + bodyMessage.Length];
+            CombineArrays(headerBytes, combinedMessage, bodyMessage);
+            return combinedMessage;
         }
 
         public bool ShouldRun(Request request, IPathContents pathContents)

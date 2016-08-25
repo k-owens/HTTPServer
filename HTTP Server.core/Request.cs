@@ -6,7 +6,7 @@ namespace HTTPServer.core
     public class Request
     {
         public string HttpVersion { get; }
-        public  string Uri { get; }
+        public  string Uri { get; set; }
         public  string Method { get; }
         public string[] Headers { get; }
         public byte[] Body { get; }
