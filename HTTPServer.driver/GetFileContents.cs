@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Text;
 using System.Linq;
+using HTTPServer.core;
 
-namespace HTTPServer.core
+namespace HTTPServer.app
 {
     public class GetFileContents : IHttpHandler
     {
@@ -15,9 +16,14 @@ namespace HTTPServer.core
 
         public byte[] Execute(Request request)
         {
+            if(!ShouldRun(request))
+            {
+                var postContents = new PostContents(_fileContents);
+                return postContents.Execute(request);
+            }
             if (request.Uri.Equals("/logs"))
                 return GetLogContents();
-            if (IsValidFile(request.Uri, _fileContents))           
+            if (IsValidFile(request.Uri, _fileContents))
                 return ObtainFileContents(request);
             return Encoding.UTF8.GetBytes("HTTP/1.1 404 Not Found\r\n");
         }
@@ -32,7 +38,7 @@ namespace HTTPServer.core
             return combinedMessage;
         }
 
-        public bool ShouldRun(Request request, IPathContents pathContents)
+        private bool ShouldRun(Request request)
         {
             return IsGetMethod(request.Method);
         }

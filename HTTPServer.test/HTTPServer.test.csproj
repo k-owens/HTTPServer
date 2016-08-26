@@ -79,6 +79,10 @@
       <Project>{50254fb2-9ca3-4fa4-a684-235f80ee3e91}</Project>
       <Name>HTTPServer.core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\HTTPServer.driver\HTTPServer.app.csproj">
+      <Project>{48837020-d0a4-4b95-b004-324c247609c9}</Project>
+      <Name>HTTPServer.app</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

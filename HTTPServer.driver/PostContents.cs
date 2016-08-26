@@ -1,6 +1,8 @@
 ﻿using System.Text;
+using HTTPServer.core;
 
-namespace HTTPServer.core
+
+namespace HTTPServer.app
 {
     public class PostContents : IHttpHandler
     {

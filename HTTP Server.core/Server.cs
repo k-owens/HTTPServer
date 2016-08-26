@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using HTTP_Server.core;
 
 namespace HTTPServer.core
 {
@@ -60,9 +57,6 @@ namespace HTTPServer.core
 
         private byte[] GetReply(Request request)
         {
-            var error = new ErrorMessage();
-            if (error.ShouldRun(request,_pathContents))
-                return error.Execute(request);
             return _requestRouter.HandleData(request, _pathContents);
         }
 
