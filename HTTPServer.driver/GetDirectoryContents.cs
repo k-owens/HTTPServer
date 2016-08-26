@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Text;
+using HTTPServer.core;
 
-namespace HTTPServer.core
+namespace HTTPServer.app
 {
     public class GetDirectoryContents : IHttpHandler
     {
@@ -14,10 +15,15 @@ namespace HTTPServer.core
 
         public byte[] Execute(Request request)
         {
+            if(!ShouldRun(request))
+            {
+                var getFileContents = new GetFileContents(_directoryContents);
+                return getFileContents.Execute(request);
+            }
             return ObtainDirectoryContents();
         }
 
-        public bool ShouldRun(Request request, IPathContents pathContents)
+        private bool ShouldRun(Request request)
         {
             return IsRoot(request.Uri) && IsGetMethod(request.Method);
         }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using HTTPServer.core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Assert = Xunit.Assert;
+using HTTPServer.app;
 
 namespace HTTPServer.test
 {
@@ -160,10 +161,7 @@ namespace HTTPServer.test
         private static RequestRouter AddFunctionality()
         {
             MockPathContents pathContents = new MockPathContents(@"C:\gitwork\HTTP Server");
-            RequestRouter requestRouter = new RequestRouter();
-            requestRouter.AddAction(new GetDirectoryContents(pathContents));
-            requestRouter.AddAction(new GetFileContents(pathContents));
-            requestRouter.AddAction(new PostContents(pathContents));
+            RequestRouter requestRouter = new RequestRouter(new ErrorMessage(pathContents));
             return requestRouter;
         }
 

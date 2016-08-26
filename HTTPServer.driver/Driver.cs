@@ -2,7 +2,7 @@
 using HTTPServer.core;
 using System.Net.Sockets;
 
-namespace HTTPServer.driver
+namespace HTTPServer.app
 {
     public class Driver
     {
@@ -14,8 +14,9 @@ namespace HTTPServer.driver
         {
             
             HandleCommands(args);
-            var requestHandler = AddFunctionality();
-            var info = new ServerInfo(port, new ConcretePathContents(directoryPath), requestHandler);
+            var pathContents = new ConcretePathContents(directoryPath);
+            var requestHandler = new RequestRouter(new ErrorMessage(pathContents));
+            var info = new ServerInfo(port, pathContents, requestHandler);
             server.Start(info);
             server.HandleClients();
         }
@@ -34,16 +35,6 @@ namespace HTTPServer.driver
                         break;
                 }
             }
-        }
-
-        private static RequestRouter AddFunctionality()
-        {
-            var pathContents = new ConcretePathContents(directoryPath);
-            var requestHandler = new RequestRouter();
-            requestHandler.AddAction(new GetDirectoryContents(pathContents));
-            requestHandler.AddAction(new GetFileContents(pathContents));
-            requestHandler.AddAction(new PostContents(pathContents));
-            return requestHandler;
         }
     }
 }

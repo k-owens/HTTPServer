@@ -44,6 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Driver.cs" />
+    <Compile Include="ErrorMessage.cs" />
+    <Compile Include="GetDirectoryContents.cs" />
+    <Compile Include="GetFileContents.cs" />
+    <Compile Include="PostContents.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

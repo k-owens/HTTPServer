@@ -1,22 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using HTTPServer.core;
 
-namespace HTTP_Server.core
+namespace HTTPServer.app
 {
     public class ErrorMessage : IHttpHandler
     {
+        private IPathContents _pathContents;
+
+        public ErrorMessage(IPathContents pathContents)
+        {
+            _pathContents = pathContents;
+        }
+
         public byte[] Execute(Request request)
         {
+            if(!ShouldRun(request))
+            {
+                var getDirectoryContents = new GetDirectoryContents(_pathContents);
+                return getDirectoryContents.Execute(request);
+            }
             if (!IsValidMethod(request) || !request.HttpVersion.Substring(0, 5).Equals("HTTP/"))
                 return Encoding.UTF8.GetBytes("HTTP/1.1 400 Bad Request\r\n");
             return Encoding.UTF8.GetBytes("HTTP/1.1 505 HTTP Version Not Supported\r\n");
         }
 
-        public bool ShouldRun(Request request, IPathContents pathContents)
+        private bool ShouldRun(Request request)
         {
             return !IsValidMethod(request) || !request.HttpVersion.Equals("HTTP/1.1");
         }
