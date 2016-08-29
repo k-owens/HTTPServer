@@ -14,33 +14,15 @@ namespace HTTPServer.app
             _fileContents = fileContents;
         }
 
-        public byte[] Execute(Request request)
+        public Reply Execute(Request request)
         {
-            if(!ShouldRun(request))
-            {
-                var postContents = new PostContents(_fileContents);
-                return postContents.Execute(request);
-            }
             if (request.Uri.Equals("/logs"))
-                return GetLogContents();
+                return ObtainFileContents(request, "../logs.txt");
             if (IsValidFile(request.Uri, _fileContents))
-                return ObtainFileContents(request);
-            return Encoding.UTF8.GetBytes("HTTP/1.1 404 Not Found\r\n");
-        }
-
-        private byte[] GetLogContents()
-        {
-            var bodyMessage = _fileContents.GetFileContents("../logs.txt");
-            var messageHeaders = "HTTP/1.1 200 OK\r\n" + "Content-Length: " + bodyMessage.Length + "\r\n\r\n";
-            var headerBytes = Encoding.UTF8.GetBytes(messageHeaders);
-            var combinedMessage = new byte[headerBytes.Length + bodyMessage.Length];
-            CombineArrays(headerBytes, combinedMessage, bodyMessage);
-            return combinedMessage;
-        }
-
-        private bool ShouldRun(Request request)
-        {
-            return IsGetMethod(request.Method);
+                return ObtainFileContents(request, FormattedFilePath(_fileContents, request.Uri));
+            var reply = new Reply();
+            reply.StartingLine = Encoding.UTF8.GetBytes("HTTP/1.1 404 Not Found\r\n");
+            return reply;
         }
 
         private bool IsValidFile(string uri, IPathContents pathContents)
@@ -75,36 +57,35 @@ namespace HTTPServer.app
             return requestMethod.Equals("GET");
         }
 
-        private byte[] ObtainFileContents(Request request)
+        private Reply ObtainFileContents(Request request, string file)
         {
             if (HasRangeHeader(request))
                 return GetRangeResponse(request);
-            return GetNormalResponse(request);
+            return GetNormalResponse(request, file);
         }
 
-        private byte[] GetNormalResponse(Request request)
+        private Reply GetNormalResponse(Request request, string file)
         {
-            var bodyMessage = _fileContents.GetFileContents(FormattedFilePath(_fileContents, request.Uri));
-            var messageHeaders = "HTTP/1.1 200 OK\r\n" + "Content-Length: " + bodyMessage.Length + "\r\n\r\n";
-            var headerBytes = Encoding.UTF8.GetBytes(messageHeaders);
-            var combinedMessage = new byte[headerBytes.Length + bodyMessage.Length];
-            CombineArrays(headerBytes, combinedMessage, bodyMessage);
-            return combinedMessage;
+            var reply = new Reply();
+            reply.Body = _fileContents.GetFileContents(file);
+            reply.StartingLine = Encoding.UTF8.GetBytes("HTTP/1.1 200 OK\r\n");
+            var messageHeaders = "Content-Length: " + reply.Body.Length + "\r\n";
+            reply.Headers = Encoding.UTF8.GetBytes(messageHeaders);
+            return reply;
         }
 
-        private byte[] GetRangeResponse(Request request)
+        private Reply GetRangeResponse(Request request)
         {
+            Reply reply = new Reply();
             var bodyMessage = _fileContents.GetFileContents(FormattedFilePath(_fileContents, request.Uri));
             var requestRanges = GetRanges(request);
             var startingByte = Int32.Parse(requestRanges[0]);
             var endingByte = Int32.Parse(requestRanges[1]);
-            var portionBodyMessage = GetPortionOfBody(bodyMessage, startingByte, endingByte);
-            var messageHeaders = "HTTP/1.1 206 Partial Content\r\n" + "Content-Length: " + portionBodyMessage.Length
-                                 + "\r\nContent-Range: bytes " + startingByte + "-" + endingByte + "\r\n\r\n";
-            var headerBytes = Encoding.UTF8.GetBytes(messageHeaders);
-            var combinedMessage = new byte[headerBytes.Length + portionBodyMessage.Length];
-            CombineArrays(headerBytes, combinedMessage, portionBodyMessage);
-            return combinedMessage;
+            reply.Body = GetPortionOfBody(bodyMessage, startingByte, endingByte);
+            reply.StartingLine = Encoding.UTF8.GetBytes("HTTP/1.1 206 Partial Content\r\n");
+            reply.Headers = Encoding.UTF8.GetBytes("Content-Length: " + reply.Body.Length
+                                 + "\r\nContent-Range: bytes " + startingByte + "-" + endingByte + "\r\n");
+            return reply;
         }
 
         private static bool HasRangeHeader(Request request)

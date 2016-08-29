@@ -43,20 +43,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BadRequestCriteria.cs" />
+    <Compile Include="DirectoryContentsCriteria.cs" />
     <Compile Include="Driver.cs" />
-    <Compile Include="ErrorMessage.cs" />
+    <Compile Include="BadRequestErrorMessage.cs" />
+    <Compile Include="FileContentsCriteria.cs" />
     <Compile Include="GetDirectoryContents.cs" />
     <Compile Include="GetFileContents.cs" />
     <Compile Include="PostContents.cs" />
+    <Compile Include="PostCriteria.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VersionNotSupported.cs" />
+    <Compile Include="VersionNotSupportedCriteria.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HTTP Server.core\HTTPServer.core.csproj">
+    <ProjectReference Include="..\HTTP Server.core\HTTPServer.Core.csproj">
       <Project>{50254fb2-9ca3-4fa4-a684-235f80ee3e91}</Project>
-      <Name>HTTPServer.core</Name>
+      <Name>HTTPServer.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

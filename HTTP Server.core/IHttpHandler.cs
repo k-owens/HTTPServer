@@ -2,6 +2,6 @@
 {
     public interface IHttpHandler
     {
-        byte[] Execute(Request request);
+        Reply Execute(Request request);
     }
 }
