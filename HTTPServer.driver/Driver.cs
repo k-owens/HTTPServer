@@ -1,6 +1,7 @@
 ﻿using System;
 using HTTPServer.core;
 using System.Net.Sockets;
+using System.Collections.Generic;
 
 namespace HTTPServer.app
 {
@@ -15,10 +16,24 @@ namespace HTTPServer.app
             
             HandleCommands(args);
             var pathContents = new ConcretePathContents(directoryPath);
-            var requestHandler = new RequestRouter(new ErrorMessage(pathContents));
-            var info = new ServerInfo(port, pathContents, requestHandler);
+            List<Tuple<ICriteria, IHttpHandler>> commandDetails = AddFunctionality(pathContents);
+            var requestHandler = new RequestRouter(commandDetails);
+
+            var info = new ServerInfo(port, pathContents,requestHandler);
             server.Start(info);
             server.HandleClients();
+        }
+
+        private static List<Tuple<ICriteria, IHttpHandler>> AddFunctionality(IPathContents pathContents)
+        {
+            List<Tuple<ICriteria, IHttpHandler>> commandDetails = new List<Tuple<ICriteria, IHttpHandler>>();
+
+            commandDetails.Add(Tuple.Create((ICriteria)new BadRequestCriteria(),(IHttpHandler)new BadRequestErrorMessage(pathContents)));
+            commandDetails.Add(Tuple.Create((ICriteria)new VersionNotSupportedCriteria(), (IHttpHandler)new VersionNotSupported()));
+            commandDetails.Add(Tuple.Create((ICriteria)new DirectoryContentsCriteria(), (IHttpHandler)new GetDirectoryContents(pathContents)));
+            commandDetails.Add(Tuple.Create((ICriteria)new FileContentsCriteria(), (IHttpHandler)new GetFileContents(pathContents)));
+            commandDetails.Add(Tuple.Create((ICriteria)new PostCriteria(), (IHttpHandler)new PostContents(pathContents)));
+            return commandDetails;
         }
 
         private static void HandleCommands(string[] args)
