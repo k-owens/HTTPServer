@@ -11,15 +11,16 @@ namespace HTTPServer.core
             DirectoryPath = directoryPath;
         }
 
-        public string[] GetFiles()
+        public string[] GetFiles(string directoryExtension)
         {
-            return Directory.GetFiles(DirectoryPath);
+            return Directory.GetFiles(DirectoryPath + directoryExtension);
         }
 
-        public string[] GetDirectories()
+        public string[] GetDirectories(string directoryExtension)
         {
-            return Directory.GetDirectories(DirectoryPath);
+            return Directory.GetDirectories(DirectoryPath + directoryExtension);
         }
+
         public byte[] GetFileContents(string filePath)
         {
             return System.IO.File.ReadAllBytes(filePath);
