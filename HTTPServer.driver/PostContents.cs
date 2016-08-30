@@ -46,7 +46,7 @@ namespace HTTPServer.app
         {
             try
             {
-                var files = pathContents.GetFiles();
+                var files = pathContents.GetFiles("");
                 foreach (string file in files)
                 {
                     var expectedFilePath = GetExpectedFilePath(uri, pathContents);
