@@ -7,6 +7,7 @@ using HTTPServer.core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Assert = Xunit.Assert;
 using HTTPServer.app;
+using System.Collections.Generic;
 
 namespace HTTPServer.test
 {
@@ -40,7 +41,7 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanReturn200Integration()
         {
-            var message = IntegrationRun("GET / HTTP/1.1\r\n");
+            var message = IntegrationRun("GET / HTTP/1.1\r\n\r\n");
             Assert.Equal("HTTP/1.1 200 OK\r\n" +
                                                "Content-Length: 98\r\n" +
                                                "\r\n" +
@@ -80,27 +81,27 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerCanReturn404Integration()
         {
-            var message = IntegrationRun("GET /extension HTTP/1.1\r\n");
-            Assert.Equal("HTTP/1.1 404 Not Found\r\n", message);
+            var message = IntegrationRun("GET /extension HTTP/1.1\r\n\r\n");
+            Assert.Equal("HTTP/1.1 404 Not Found\r\n\r\n", message);
         }
 
         [TestMethod]
         public void ServerCanReply404()
         {
-            TestResponse("GET /extension HTTP/1.1\r\n","HTTP/1.1 404 Not Found\r\n","");
+            TestResponse("GET /extension HTTP/1.1\r\n\r\n","HTTP/1.1 404 Not Found\r\n\r\n","");
         }
 
         [TestMethod]
         public void ServerWillGive400ForMalformedRequests()
         {
-            var message = IntegrationRun("GET / http/1.1\r\n");
-            Assert.Equal("HTTP/1.1 400 Bad Request\r\n", message);
+            var message = IntegrationRun("GET / http/1.1\r\n\r\n");
+            Assert.Equal("HTTP/1.1 400 Bad Request\r\n\r\n", message);
         }
 
         [TestMethod]
         public void ServerCanReturnFilesInDirectory()
         {
-            TestResponse("GET / HTTP/1.1\r\n", "HTTP/1.1 200 OK\r\n" +
+            TestResponse("GET / HTTP/1.1\r\n\r\n", "HTTP/1.1 200 OK\r\n" +
                                                "Content-Length: 98\r\n" +
                                                "\r\n" +
                                                "<html>" +
@@ -127,14 +128,14 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerWillGive505ForBadVersion()
         {
-            var message = IntegrationRun("GET / HTTP/1.0\r\n");
-            Assert.Equal("HTTP/1.1 505 HTTP Version Not Supported\r\n", message);
+            var message = IntegrationRun("GET / HTTP/1.0\r\n\r\n");
+            Assert.Equal("HTTP/1.1 505 HTTP Version Not Supported\r\n\r\n", message);
         }
 
         [TestMethod]
         public void ServerWillRespondToPost()
         {
-            TestResponse("POST /fileExample.txt HTTP/1.1\r\n\r\nThis will be in the file.", "HTTP/1.1 201 Created\r\n", @"C:\gitwork\HTTP Server");
+            TestResponse("POST /fileExample.txt HTTP/1.1\r\n\r\nThis will be in the file.", "HTTP/1.1 201 Created\r\n\r\n", @"C:\gitwork\HTTP Server");
         }
 
         [TestMethod]
@@ -160,8 +161,16 @@ namespace HTTPServer.test
 
         private static RequestRouter AddFunctionality()
         {
+
             MockPathContents pathContents = new MockPathContents(@"C:\gitwork\HTTP Server");
-            RequestRouter requestRouter = new RequestRouter(new ErrorMessage(pathContents));
+            List<Tuple<ICriteria, IHttpHandler>> commandDetails = new List<Tuple<ICriteria, IHttpHandler>>();
+
+            commandDetails.Add(Tuple.Create((ICriteria)new BadRequestCriteria(), (IHttpHandler)new BadRequestErrorMessage(pathContents)));
+            commandDetails.Add(Tuple.Create((ICriteria)new VersionNotSupportedCriteria(), (IHttpHandler)new VersionNotSupported()));
+            commandDetails.Add(Tuple.Create((ICriteria)new DirectoryContentsCriteria(), (IHttpHandler)new GetDirectoryContents(pathContents)));
+            commandDetails.Add(Tuple.Create((ICriteria)new FileContentsCriteria(), (IHttpHandler)new GetFileContents(pathContents)));
+            commandDetails.Add(Tuple.Create((ICriteria)new PostCriteria(), (IHttpHandler)new PostContents(pathContents)));
+            RequestRouter requestRouter = new RequestRouter(commandDetails);
             return requestRouter;
         }
 
@@ -171,7 +180,7 @@ namespace HTTPServer.test
             var byteRequestMessage = Encoding.UTF8.GetBytes(requestMessage);
             var request = new Request(byteRequestMessage);
             var replyMessage = requestHandler.HandleData(request, new MockPathContents(directory));
-            Assert.Equal(expectedReply, Encoding.UTF8.GetString(replyMessage));
+            Assert.Equal(expectedReply, Encoding.UTF8.GetString(replyMessage.ReplyMessage()));
         }
 
         private Socket SetUpClient()

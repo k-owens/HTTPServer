@@ -40,8 +40,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConcretePathContents.cs" />
+    <Compile Include="ICriteria.cs" />
     <Compile Include="IHttpHandler.cs" />
     <Compile Include="IPathContents.cs" />
+    <Compile Include="Reply.cs" />
     <Compile Include="Request.cs" />
     <Compile Include="RequestRouter.cs" />
     <Compile Include="Server.cs" />

@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTPServer.core", "HTTP Server.core\HTTPServer.core.csproj", "{50254FB2-9CA3-4FA4-A684-235F80EE3E91}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTPServer.Core", "HTTP Server.core\HTTPServer.Core.csproj", "{50254FB2-9CA3-4FA4-A684-235F80EE3E91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTPServer.test", "HTTPServer.test\HTTPServer.test.csproj", "{F2D141A9-69B4-4555-AAEE-9067B326A0B3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTPServer.Test", "HTTPServer.test\HTTPServer.Test.csproj", "{F2D141A9-69B4-4555-AAEE-9067B326A0B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTPServer.app", "HTTPServer.driver\HTTPServer.app.csproj", "{48837020-D0A4-4B95-B004-324C247609C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTPServer.App", "HTTPServer.driver\HTTPServer.App.csproj", "{48837020-D0A4-4B95-B004-324C247609C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

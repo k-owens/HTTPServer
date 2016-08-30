@@ -13,33 +13,14 @@ namespace HTTPServer.app
             _directoryContents = directoryContents;
         }
 
-        public byte[] Execute(Request request)
+        public Reply Execute(Request request)
         {
-            if(!ShouldRun(request))
-            {
-                var getFileContents = new GetFileContents(_directoryContents);
-                return getFileContents.Execute(request);
-            }
             return ObtainDirectoryContents();
         }
 
-        private bool ShouldRun(Request request)
+        private Reply ObtainDirectoryContents()
         {
-            return IsRoot(request.Uri) && IsGetMethod(request.Method);
-        }
-
-        private bool IsGetMethod(string requestMethod)
-        {
-            return requestMethod.Equals("GET");
-        }
-
-        private bool IsRoot(string uri)
-        {
-            return uri.Equals("/");
-        }
-
-        private byte[] ObtainDirectoryContents()
-        {
+            var reply = new Reply();
             string bodyMessage;
             try
             {
@@ -49,9 +30,10 @@ namespace HTTPServer.app
             {
                 bodyMessage = "";
             }
-            var wholeMessage = "HTTP/1.1 200 OK\r\n" + "Content-Length: " + 
-                bodyMessage.Length + "\r\n\r\n" + bodyMessage;
-            return Encoding.UTF8.GetBytes(wholeMessage);
+            reply.Body = Encoding.UTF8.GetBytes(bodyMessage);
+            reply.StartingLine = Encoding.UTF8.GetBytes("HTTP/1.1 200 OK\r\n");
+            reply.Headers = Encoding.UTF8.GetBytes("Content-Length: " + reply.Body.Length + "\r\n");
+            return reply;
         }
 
         private static string GetBodyOfMessage(string[] directories, string[] files)

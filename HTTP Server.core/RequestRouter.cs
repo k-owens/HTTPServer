@@ -1,18 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+
 namespace HTTPServer.core
 {
     public class RequestRouter
     {
-        private IHttpHandler _actions;
+        private List<Tuple<ICriteria, IHttpHandler>> _commandsAndCriteria;
 
-        public RequestRouter(IHttpHandler function)
+        public RequestRouter(List<Tuple<ICriteria, IHttpHandler>> commandsAndCriteria)
         {
-            _actions = function;
+            _commandsAndCriteria = commandsAndCriteria;
         }
 
-        public byte[] HandleData(Request request, IPathContents pathContents)
+        public Reply HandleData(Request request, IPathContents pathContents)
         {
-            return _actions.Execute(request);
+            for(int i = 0; i < _commandsAndCriteria.Count-1; i++)
+            {
+                if (_commandsAndCriteria[i].Item1.ShouldRun(request))
+                    return _commandsAndCriteria[i].Item2.Execute(request);
+            }
+
+            return _commandsAndCriteria[_commandsAndCriteria.Count-1].Item2.Execute(request);
         }
     }
 }

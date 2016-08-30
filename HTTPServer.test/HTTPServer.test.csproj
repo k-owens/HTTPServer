@@ -75,13 +75,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HTTP Server.core\HTTPServer.core.csproj">
+    <ProjectReference Include="..\HTTP Server.core\HTTPServer.Core.csproj">
       <Project>{50254fb2-9ca3-4fa4-a684-235f80ee3e91}</Project>
-      <Name>HTTPServer.core</Name>
+      <Name>HTTPServer.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\HTTPServer.driver\HTTPServer.app.csproj">
+    <ProjectReference Include="..\HTTPServer.driver\HTTPServer.App.csproj">
       <Project>{48837020-d0a4-4b95-b004-324c247609c9}</Project>
-      <Name>HTTPServer.app</Name>
+      <Name>HTTPServer.App</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

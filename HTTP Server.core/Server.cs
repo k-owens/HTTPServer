@@ -49,13 +49,13 @@ namespace HTTPServer.core
             string ipAddress = ((IPEndPoint)_clientConnection.RemoteEndPoint).Address.ToString();
             byte[] clientMessage = Read();
             Request request= new Request(clientMessage);
-            byte[] reply = GetReply(request);
+            byte[] reply = GetReply(request).ReplyMessage();
             var loggedMessage = request.LogRequest(reply, ipAddress, DateTime.Now);
             System.IO.File.AppendAllText("../logs.txt", loggedMessage);
             _clientConnection.Send(reply);
         }
 
-        private byte[] GetReply(Request request)
+        private Reply GetReply(Request request)
         {
             return _requestRouter.HandleData(request, _pathContents);
         }
