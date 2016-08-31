@@ -15,9 +15,9 @@ namespace HTTPServer.app
         {
             
             HandleCommands(args);
-            var pathContents = new ConcretePathContents(directoryPath);
+            var pathContents = new ConcretePathContents("C:\\gitwork\\HTTP Server");
             var requestHandler = AddFunctionality(pathContents);
-            var info = new ServerInfo(port, pathContents,requestHandler);
+            var info = new ServerInfo(8080, pathContents,requestHandler);
             server.Start(info);
             server.HandleClients();
         }
@@ -28,6 +28,7 @@ namespace HTTPServer.app
             requestRouter.AddAction(new ContentsCriteria(), new GetContents(pathContents));
             requestRouter.AddAction(new PostCriteria(), new PostContents(pathContents));
             requestRouter.AddAction(new PutCriteria(), new PutContents(pathContents));
+            requestRouter.AddAction(new DeleteCriteria(), new DeleteContents(pathContents));
             IHttpHandler versionFilter = new VersionNotSupportedFilter(requestRouter);
             IHttpHandler malformedFilter = new BadRequestFilter(pathContents, versionFilter);
             return malformedFilter;

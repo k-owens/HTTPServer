@@ -32,7 +32,7 @@ namespace HTTPServer.app
 
         private static bool IsValidMethod(Request request)
         {
-            return request.Method.Equals("GET") || request.Method.Equals("POST") || request.Method.Equals("PUT");
+            return request.Method.Equals("GET") || request.Method.Equals("POST") || request.Method.Equals("PUT") || request.Method.Equals("DELETE");
         }
     }
 }
