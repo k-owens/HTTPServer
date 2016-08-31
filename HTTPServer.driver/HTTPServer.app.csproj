@@ -51,6 +51,8 @@
     <Compile Include="PostContents.cs" />
     <Compile Include="PostCriteria.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PutContents.cs" />
+    <Compile Include="PutCriteria.cs" />
     <Compile Include="VersionNotSupported.cs" />
     <Compile Include="VersionNotSupportedCriteria.cs" />
   </ItemGroup>

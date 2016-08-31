@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace HTTPServer.core
 {
@@ -29,6 +30,14 @@ namespace HTTPServer.core
         public void PostContents(Request request)
         {
             System.IO.File.WriteAllBytes(DirectoryPath + "\\" + request.Uri.Substring(1), request.Body);
+        }
+
+        public void PutContents(Request request)
+        {
+            var fileStream = new FileStream(DirectoryPath + "\\" + request.Uri.Substring(1), FileMode.Append);
+            fileStream.Write(request.Body, 0, request.Body.Length);
+            fileStream.Flush();
+            fileStream.Close();
         }
     }
 }

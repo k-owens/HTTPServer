@@ -153,6 +153,12 @@ namespace HTTPServer.test
                 Assert.Equal("127.0.0.1 " + DateTime.Today + " GET /extension.txt HTTP/1.1 404\r\n", logMessage);
         }
 
+        [TestMethod]
+        public void ServerWillRespondToPut()
+        {
+            TestResponse("PUT /fileExample.txt HTTP/1.1\r\n\r\nThis will be in the file.", "HTTP/1.1 200 OK\r\n\r\n", @"C:\gitwork\HTTP Server");
+        }
+
         private string CreateTempFile()
         {
             var fileName = Path.GetTempFileName();
@@ -172,6 +178,7 @@ namespace HTTPServer.test
             commandDetails.Add(Tuple.Create((ICriteria)new VersionNotSupportedCriteria(), (IHttpHandler)new VersionNotSupported()));
             commandDetails.Add(Tuple.Create((ICriteria)new ContentsCriteria(), (IHttpHandler)new GetContents(pathContents)));
             commandDetails.Add(Tuple.Create((ICriteria)new PostCriteria(), (IHttpHandler)new PostContents(pathContents)));
+            commandDetails.Add(Tuple.Create((ICriteria)new PutCriteria(), (IHttpHandler)new PutContents(pathContents)));
             RequestRouter requestRouter = new RequestRouter(commandDetails);
             return requestRouter;
         }
