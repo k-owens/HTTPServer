@@ -11,7 +11,7 @@ namespace HTTPServer.app
     {
         public bool ShouldRun(Request request)
         {
-            return request.Method.Equals("PUT") && request.HttpVersion.Equals("HTTP/1.1") && !request.Uri.Equals("/");
+            return request.Method.Equals("PUT") && !request.Uri.Equals("/");
         }
     }
 }
