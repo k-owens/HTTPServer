@@ -32,6 +32,7 @@ namespace HTTPServer.app
             commandDetails.Add(Tuple.Create((ICriteria)new VersionNotSupportedCriteria(), (IHttpHandler)new VersionNotSupported()));
             commandDetails.Add(Tuple.Create((ICriteria)new ContentsCriteria(), (IHttpHandler)new GetContents(pathContents)));
             commandDetails.Add(Tuple.Create((ICriteria)new PostCriteria(), (IHttpHandler)new PostContents(pathContents)));
+            commandDetails.Add(Tuple.Create((ICriteria)new PutCriteria(), (IHttpHandler)new PutContents(pathContents)));
             return commandDetails;
         }
 

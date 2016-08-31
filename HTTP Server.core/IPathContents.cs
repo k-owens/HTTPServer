@@ -7,5 +7,6 @@
         string[] GetDirectories(string directoryExtension);
         byte[] GetFileContents(string filePath);
         void PostContents(Request request);
+        void PutContents(Request request);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using HTTPServer.core;
 
 namespace HTTPServer.test
@@ -30,6 +31,11 @@ namespace HTTPServer.test
         public void PostContents(Request request)
         {
             
+        }
+
+        public void PutContents(Request request)
+        {
+
         }
     }
 }
