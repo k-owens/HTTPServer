@@ -16,24 +16,20 @@ namespace HTTPServer.app
             
             HandleCommands(args);
             var pathContents = new ConcretePathContents(directoryPath);
-            List<Tuple<ICriteria, IHttpHandler>> commandDetails = AddFunctionality(pathContents);
-            var requestHandler = new RequestRouter(commandDetails);
-
+            var requestHandler = AddFunctionality(pathContents);
             var info = new ServerInfo(port, pathContents,requestHandler);
             server.Start(info);
             server.HandleClients();
         }
 
-        private static List<Tuple<ICriteria, IHttpHandler>> AddFunctionality(IPathContents pathContents)
+        private static RequestRouter AddFunctionality(IPathContents pathContents)
         {
-            List<Tuple<ICriteria, IHttpHandler>> commandDetails = new List<Tuple<ICriteria, IHttpHandler>>();
-
-            commandDetails.Add(Tuple.Create((ICriteria)new BadRequestCriteria(),(IHttpHandler)new BadRequestErrorMessage(pathContents)));
-            commandDetails.Add(Tuple.Create((ICriteria)new VersionNotSupportedCriteria(), (IHttpHandler)new VersionNotSupported()));
-            commandDetails.Add(Tuple.Create((ICriteria)new ContentsCriteria(), (IHttpHandler)new GetContents(pathContents)));
-            commandDetails.Add(Tuple.Create((ICriteria)new PostCriteria(), (IHttpHandler)new PostContents(pathContents)));
-            commandDetails.Add(Tuple.Create((ICriteria)new PutCriteria(), (IHttpHandler)new PutContents(pathContents)));
-            return commandDetails;
+            var requestHandler = new RequestRouter();
+            requestHandler.AddAction(new BadRequestCriteria(),new BadRequestErrorMessage(pathContents));
+            requestHandler.AddAction(new ContentsCriteria(), new GetContents(pathContents));
+            requestHandler.AddAction(new PostCriteria(), new PostContents(pathContents));
+            requestHandler.AddAction(new PutCriteria(), new PutContents(pathContents));
+            return requestHandler;
         }
 
         private static void HandleCommands(string[] args)

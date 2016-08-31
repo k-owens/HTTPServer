@@ -171,15 +171,11 @@ namespace HTTPServer.test
 
         private static RequestRouter AddFunctionality(string fileName, IPathContents pathContents)
         {
-
-            List<Tuple<ICriteria, IHttpHandler>> commandDetails = new List<Tuple<ICriteria, IHttpHandler>>();
-
-            commandDetails.Add(Tuple.Create((ICriteria)new BadRequestCriteria(), (IHttpHandler)new BadRequestErrorMessage(pathContents)));
-            commandDetails.Add(Tuple.Create((ICriteria)new VersionNotSupportedCriteria(), (IHttpHandler)new VersionNotSupported()));
-            commandDetails.Add(Tuple.Create((ICriteria)new ContentsCriteria(), (IHttpHandler)new GetContents(pathContents)));
-            commandDetails.Add(Tuple.Create((ICriteria)new PostCriteria(), (IHttpHandler)new PostContents(pathContents)));
-            commandDetails.Add(Tuple.Create((ICriteria)new PutCriteria(), (IHttpHandler)new PutContents(pathContents)));
-            RequestRouter requestRouter = new RequestRouter(commandDetails);
+            var requestRouter = new RequestRouter();
+            requestRouter.AddAction(new BadRequestCriteria(), new BadRequestErrorMessage(pathContents));
+            requestRouter.AddAction(new ContentsCriteria(), new GetContents(pathContents));
+            requestRouter.AddAction(new PostCriteria(), new PostContents(pathContents));
+            requestRouter.AddAction(new PutCriteria(), new PutContents(pathContents));
             return requestRouter;
         }
 
