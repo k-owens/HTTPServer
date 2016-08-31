@@ -23,7 +23,7 @@ namespace HTTPServer.test
         public void ServerCanStart()
         {
             Server server = new Server();
-            RequestRouter requestRouter = AddFunctionality("", new MockPathContents(""));
+            IHttpHandler requestRouter = AddFunctionality("", new MockPathContents(""));
             ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
             Assert.True(server.Start(info) != null);
             server.Stop();
@@ -33,7 +33,7 @@ namespace HTTPServer.test
         public void ServerCanStop()
         {
             Server server = new Server();
-            RequestRouter requestRouter = AddFunctionality("", new MockPathContents(""));
+            IHttpHandler requestRouter = AddFunctionality("", new MockPathContents(""));
             ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
             server.Start(info);
             Assert.True(server.Stop());
@@ -169,14 +169,15 @@ namespace HTTPServer.test
             return fileName;
         }
 
-        private static RequestRouter AddFunctionality(string fileName, IPathContents pathContents)
+        private static IHttpHandler AddFunctionality(string fileName, IPathContents pathContents)
         {
-            var requestRouter = new RequestRouter();
-            requestRouter.AddAction(new BadRequestCriteria(), new BadRequestErrorMessage(pathContents));
+            var requestRouter = new RequestRouter(pathContents);
             requestRouter.AddAction(new ContentsCriteria(), new GetContents(pathContents));
             requestRouter.AddAction(new PostCriteria(), new PostContents(pathContents));
             requestRouter.AddAction(new PutCriteria(), new PutContents(pathContents));
-            return requestRouter;
+            IHttpHandler versionFilter = new VersionNotSupportedFilter(requestRouter);
+            IHttpHandler malformedFilter = new BadRequestFilter(pathContents,versionFilter);
+            return malformedFilter;
         }
 
         private static void TestResponse(string requestMessage, string expectedReply, string directory)
@@ -184,7 +185,7 @@ namespace HTTPServer.test
             var requestHandler = AddFunctionality(directory, new ConcretePathContents(directory));
             var byteRequestMessage = Encoding.UTF8.GetBytes(requestMessage);
             var request = new Request(byteRequestMessage);
-            var replyMessage = requestHandler.HandleData(request, new ConcretePathContents(directory));
+            var replyMessage = requestHandler.Execute(request);
             Assert.Equal(expectedReply, Encoding.UTF8.GetString(replyMessage.ReplyMessage()));
         }
 
@@ -213,7 +214,7 @@ namespace HTTPServer.test
 
         private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint, Server server, IPathContents pathContents)
         {
-            RequestRouter requestRouter = AddFunctionality("", pathContents);
+            IHttpHandler requestRouter = AddFunctionality("", pathContents);
             ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
             server.Start(info);
             socket.Connect(ipEndPoint);

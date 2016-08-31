@@ -22,14 +22,15 @@ namespace HTTPServer.app
             server.HandleClients();
         }
 
-        private static RequestRouter AddFunctionality(IPathContents pathContents)
+        private static IHttpHandler AddFunctionality(IPathContents pathContents)
         {
-            var requestHandler = new RequestRouter();
-            requestHandler.AddAction(new BadRequestCriteria(),new BadRequestErrorMessage(pathContents));
-            requestHandler.AddAction(new ContentsCriteria(), new GetContents(pathContents));
-            requestHandler.AddAction(new PostCriteria(), new PostContents(pathContents));
-            requestHandler.AddAction(new PutCriteria(), new PutContents(pathContents));
-            return requestHandler;
+            var requestRouter = new RequestRouter(pathContents);
+            requestRouter.AddAction(new ContentsCriteria(), new GetContents(pathContents));
+            requestRouter.AddAction(new PostCriteria(), new PostContents(pathContents));
+            requestRouter.AddAction(new PutCriteria(), new PutContents(pathContents));
+            IHttpHandler versionFilter = new VersionNotSupportedFilter(requestRouter);
+            IHttpHandler malformedFilter = new BadRequestFilter(pathContents, versionFilter);
+            return malformedFilter;
         }
 
         private static void HandleCommands(string[] args)

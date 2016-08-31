@@ -4,12 +4,12 @@
     {
         public int Port { get; }
         public IPathContents PathContents { get; set; }
-        public RequestRouter ServerRequestRouter { get; }
+        public IHttpHandler HttpHandler { get; }
 
 
-        public ServerInfo(int port, IPathContents pathContents, RequestRouter requestRouter)
+        public ServerInfo(int port, IPathContents pathContents, IHttpHandler httpHandler)
         {
-            ServerRequestRouter = requestRouter;
+            HttpHandler = httpHandler;
             Port = port;
             PathContents = pathContents;
         }
