@@ -16,24 +16,21 @@ namespace HTTPServer.app
             
             HandleCommands(args);
             var pathContents = new ConcretePathContents(directoryPath);
-            List<Tuple<ICriteria, IHttpHandler>> commandDetails = AddFunctionality(pathContents);
-            var requestHandler = new RequestRouter(commandDetails);
-
+            var requestHandler = AddFunctionality(pathContents);
             var info = new ServerInfo(port, pathContents,requestHandler);
             server.Start(info);
             server.HandleClients();
         }
 
-        private static List<Tuple<ICriteria, IHttpHandler>> AddFunctionality(IPathContents pathContents)
+        private static IHttpHandler AddFunctionality(IPathContents pathContents)
         {
-            List<Tuple<ICriteria, IHttpHandler>> commandDetails = new List<Tuple<ICriteria, IHttpHandler>>();
-
-            commandDetails.Add(Tuple.Create((ICriteria)new BadRequestCriteria(),(IHttpHandler)new BadRequestErrorMessage(pathContents)));
-            commandDetails.Add(Tuple.Create((ICriteria)new VersionNotSupportedCriteria(), (IHttpHandler)new VersionNotSupported()));
-            commandDetails.Add(Tuple.Create((ICriteria)new ContentsCriteria(), (IHttpHandler)new GetContents(pathContents)));
-            commandDetails.Add(Tuple.Create((ICriteria)new PostCriteria(), (IHttpHandler)new PostContents(pathContents)));
-            commandDetails.Add(Tuple.Create((ICriteria)new PutCriteria(), (IHttpHandler)new PutContents(pathContents)));
-            return commandDetails;
+            var requestRouter = new RequestRouter(pathContents);
+            requestRouter.AddAction(new ContentsCriteria(), new GetContents(pathContents));
+            requestRouter.AddAction(new PostCriteria(), new PostContents(pathContents));
+            requestRouter.AddAction(new PutCriteria(), new PutContents(pathContents));
+            IHttpHandler versionFilter = new VersionNotSupportedFilter(requestRouter);
+            IHttpHandler malformedFilter = new BadRequestFilter(pathContents, versionFilter);
+            return malformedFilter;
         }
 
         private static void HandleCommands(string[] args)

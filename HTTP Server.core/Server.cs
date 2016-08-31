@@ -10,13 +10,13 @@ namespace HTTPServer.core
         private Socket _socket;
         private Socket _clientConnection;
         private IPathContents _pathContents;
-        private RequestRouter _requestRouter;
+        private IHttpHandler _httpHandler;
 
         public Server Start(ServerInfo serverInfo)
         {
             SetupSocket(serverInfo);
             _pathContents = serverInfo.PathContents;
-            _requestRouter = serverInfo.ServerRequestRouter;
+            _httpHandler = serverInfo.HttpHandler;
             Console.WriteLine("Server has started at port " + ((IPEndPoint)_socket.LocalEndPoint).Port);
             return this;
         }
@@ -57,7 +57,7 @@ namespace HTTPServer.core
 
         private Reply GetReply(Request request)
         {
-            return _requestRouter.HandleData(request, _pathContents);
+            return _httpHandler.Execute(request);
         }
 
 
