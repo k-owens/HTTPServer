@@ -44,12 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BadRequestCriteria.cs" />
-    <Compile Include="DirectoryContentsCriteria.cs" />
+    <Compile Include="ContentsCriteria.cs" />
     <Compile Include="Driver.cs" />
     <Compile Include="BadRequestErrorMessage.cs" />
-    <Compile Include="FileContentsCriteria.cs" />
-    <Compile Include="GetDirectoryContents.cs" />
-    <Compile Include="GetFileContents.cs" />
+    <Compile Include="GetContents.cs" />
     <Compile Include="PostContents.cs" />
     <Compile Include="PostCriteria.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

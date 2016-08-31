@@ -11,12 +11,13 @@ namespace HTTPServer.test
         {
             DirectoryPath = directoryPath;
         }
-        public string[] GetFiles()
+
+        public string[] GetFiles(string directoryExtension)
         {
             return new []{ "C:\\gitwork\\HTTP Server\\file.txt" };
         }
 
-        public string[] GetDirectories()
+        public string[] GetDirectories(string directoryExtension)
         {
             return new []{ "C:\\gitwork\\HTTP Server\\.git" };
         }

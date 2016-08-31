@@ -30,8 +30,7 @@ namespace HTTPServer.app
 
             commandDetails.Add(Tuple.Create((ICriteria)new BadRequestCriteria(),(IHttpHandler)new BadRequestErrorMessage(pathContents)));
             commandDetails.Add(Tuple.Create((ICriteria)new VersionNotSupportedCriteria(), (IHttpHandler)new VersionNotSupported()));
-            commandDetails.Add(Tuple.Create((ICriteria)new DirectoryContentsCriteria(), (IHttpHandler)new GetDirectoryContents(pathContents)));
-            commandDetails.Add(Tuple.Create((ICriteria)new FileContentsCriteria(), (IHttpHandler)new GetFileContents(pathContents)));
+            commandDetails.Add(Tuple.Create((ICriteria)new ContentsCriteria(), (IHttpHandler)new GetContents(pathContents)));
             commandDetails.Add(Tuple.Create((ICriteria)new PostCriteria(), (IHttpHandler)new PostContents(pathContents)));
             return commandDetails;
         }
