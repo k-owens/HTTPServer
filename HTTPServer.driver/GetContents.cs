@@ -22,19 +22,38 @@ namespace HTTPServer.app
             }
             catch
             {
-                if (request.Uri.Equals("/logs"))
+                if (request.Uri.Equals("/logs") && HasCorrectAuthorization(request))
+                {
                     return ObtainFileContents(request, "../logs.txt");
-                    try
-                    {
-                        return ObtainFileContents(request, FormattedFilePath(_directoryContents, request.Uri));
-                    }
-                    catch
-                    {
-                        var reply = new Reply();
-                        reply.StartingLine = Encoding.UTF8.GetBytes("HTTP/1.1 404 Not Found\r\n");
-                        return reply;
-                    }
+                }
+                if (request.Uri.Equals("/logs"))
+                {
+                    Reply reply = new Reply();
+                    reply.StartingLine = Encoding.UTF8.GetBytes("HTTP/1.1 401 Access Denied\r\n");
+                    reply.Headers = Encoding.UTF8.GetBytes("WWW-Authenticate: Basic realm=\"Http Server\"\r\n");
+                    return reply;
+                }
+                try
+                {
+                    return ObtainFileContents(request, FormattedFilePath(_directoryContents, request.Uri));
+                }
+                catch
+                {
+                    var reply = new Reply();
+                    reply.StartingLine = Encoding.UTF8.GetBytes("HTTP/1.1 404 Not Found\r\n");
+                    return reply;
+                }
             }
+        }
+
+        private bool HasCorrectAuthorization(Request request)
+        {
+            for(int i = 0; i < request.Headers.Length; i++)
+            {
+                if (request.Headers[i].Equals("Authorization: Basic YTph"))
+                    return true;
+            }
+            return false;
         }
 
         private Reply ObtainDirectoryContents(Request request)
