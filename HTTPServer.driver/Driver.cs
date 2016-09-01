@@ -15,9 +15,9 @@ namespace HTTPServer.app
         {
             
             HandleCommands(args);
-            var pathContents = new ConcretePathContents("C:\\gitwork\\HTTP Server");
+            var pathContents = new ConcretePathContents(directoryPath);
             var requestHandler = AddFunctionality(pathContents);
-            var info = new ServerInfo(8080, pathContents,requestHandler);
+            var info = new ServerInfo(port, pathContents,requestHandler);
             server.Start(info);
             server.HandleClients();
         }
