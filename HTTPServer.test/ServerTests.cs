@@ -159,6 +159,12 @@ namespace HTTPServer.test
             TestResponse("PUT /fileExample.txt HTTP/1.1\r\n\r\nThis will be in the file.", "HTTP/1.1 200 OK\r\n\r\n", @"C:\gitwork\HTTP Server");
         }
 
+        [TestMethod]
+        public void ServerWillRespondToDelete()
+        {
+            TestResponse("DELETE /fileExample.txt HTTP/1.1\r\n\r\n", "HTTP/1.1 200 OK\r\n\r\n", @"C:\gitwork\HTTP Server");
+        }
+
         private string CreateTempFile()
         {
             var fileName = Path.GetTempFileName();
@@ -175,6 +181,7 @@ namespace HTTPServer.test
             requestRouter.AddAction(new ContentsCriteria(), new GetContents(pathContents));
             requestRouter.AddAction(new PostCriteria(), new PostContents(pathContents));
             requestRouter.AddAction(new PutCriteria(), new PutContents(pathContents));
+            requestRouter.AddAction(new DeleteCriteria(), new DeleteContents(pathContents));
             IHttpHandler versionFilter = new VersionNotSupportedFilter(requestRouter);
             IHttpHandler malformedFilter = new BadRequestFilter(pathContents,versionFilter);
             return malformedFilter;

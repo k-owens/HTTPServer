@@ -28,6 +28,7 @@ namespace HTTPServer.app
             requestRouter.AddAction(new ContentsCriteria(), new GetContents(pathContents));
             requestRouter.AddAction(new PostCriteria(), new PostContents(pathContents));
             requestRouter.AddAction(new PutCriteria(), new PutContents(pathContents));
+            requestRouter.AddAction(new DeleteCriteria(), new DeleteContents(pathContents));
             IHttpHandler versionFilter = new VersionNotSupportedFilter(requestRouter);
             IHttpHandler malformedFilter = new BadRequestFilter(pathContents, versionFilter);
             return malformedFilter;
