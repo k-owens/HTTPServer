@@ -87,15 +87,15 @@ namespace HTTPServer.core
             return messageReceived;
         }
 
-        private static bool IsLessThanKb(int bytesReceived)
-        {
-            return bytesReceived < 1024;
-        }
+    private static bool IsLessThanKb(int bytesReceived)
+    {
+        return bytesReceived < 1024;
+    }
 
-        private int ReadKbOfData(List<byte> messageReceived)
+    private int ReadKbOfData(List<byte> messageReceived)
         {
             var buffer = new byte[1024];
-            var bytesReceived = ReceiveData(buffer);
+            var bytesReceived = ReceiveData(buffer); 
             for (var bufferIndex = 0; bufferIndex < bytesReceived; bufferIndex++)
                 messageReceived.Add(buffer[bufferIndex]);
             return bytesReceived;
