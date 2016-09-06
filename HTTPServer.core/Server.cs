@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
 namespace HTTPServer.core
 {
@@ -80,30 +81,49 @@ namespace HTTPServer.core
             var messageReceived = new List<byte>();
             while (true)
             {
-                var bytesReceived = ReadKbOfData(messageReceived);
-                if (IsLessThanKb(bytesReceived))
+                ReadKbOfData(messageReceived);
+                if (IsDoneReading(messageReceived))
                     break;
             }
             return messageReceived;
         }
 
-    private static bool IsLessThanKb(int bytesReceived)
-    {
-        return bytesReceived < 1024;
-    }
-
-    private int ReadKbOfData(List<byte> messageReceived)
+        private bool IsDoneReading(List<byte> messageReceived)
         {
-            var buffer = new byte[1024];
-            var bytesReceived = ReceiveData(buffer); 
-            for (var bufferIndex = 0; bufferIndex < bytesReceived; bufferIndex++)
-                messageReceived.Add(buffer[bufferIndex]);
-            return bytesReceived;
+            var messageBytes = FormatObtainedData(messageReceived);
+            var message = Encoding.UTF8.GetString(messageBytes);
+            return message.Contains("\r\n\r\n") && HasWholeBody(message);
         }
 
-        private int ReceiveData(byte[] buffer)
+        private bool HasWholeBody(string message)
         {
-            return _clientConnection.Receive(buffer);
+            if(!message.Contains("Content-Length:"))
+                return true;
+            var headers = message.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+            var contentLength = CalculateContentLength(headers);
+            var headerBodySplit = message.Split(new string[] { "\r\n\r\n" }, StringSplitOptions.None);
+            return contentLength <= headerBodySplit[1].Length;
+        }
+
+        private int CalculateContentLength(string[] headers)
+        {
+            for (int i = 0; i < headers.Length - 1; i++)
+            {
+                if (headers[i].Contains("Content-Length:"))
+                {
+                    var startOfNumber = headers[i].IndexOf("Content-Length:") + 16;
+                    return Int32.Parse(headers[i].Substring(startOfNumber, headers[i].Length - startOfNumber));
+                }
+            }
+            return 0;
+        }
+
+        private void ReadKbOfData(List<byte> messageReceived)
+        {
+            var buffer = new byte[1024];
+            var bytesReceived = _clientConnection.Receive(buffer);
+            for (var bufferIndex = 0; bufferIndex < bytesReceived; bufferIndex++)
+                messageReceived.Add(buffer[bufferIndex]);
         }
 
         public bool Stop()
