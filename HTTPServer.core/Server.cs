@@ -12,6 +12,7 @@ namespace HTTPServer.core
         private Socket _clientConnection;
         private IPathContents _pathContents;
         private IHttpHandler _httpHandler;
+        private static bool keepRunning = true;
 
         public Server Start(ServerInfo serverInfo)
         {
@@ -37,7 +38,13 @@ namespace HTTPServer.core
 
         public void HandleClients()
         {
-            while (true)
+            Console.CancelKeyPress += delegate (object sender, ConsoleCancelEventArgs e)
+            {
+                e.Cancel = true;
+                keepRunning = false;
+            };
+
+            while (keepRunning)
             {
                 _clientConnection = _socket.Accept();
                 RespondToClient();
