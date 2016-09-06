@@ -123,8 +123,8 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerWillRespondToPost()
         {
-            TestResponse("POST /fileExample.txt HTTP/1.1\r\n\r\nThis will be in the file.", "HTTP/1.1 201 Created\r\n\r\n", @"C:\gitwork\HTTP Server");
-            File.Delete(@"C:\gitwork\HTTP Server" + "/fileExample.txt");
+            TestResponse("POST /fileExample.txt HTTP/1.1\r\n\r\nThis will be in the file.", "HTTP/1.1 201 Created\r\n\r\n", @"C:\gitwork\HTTPServer");
+            File.Delete(@"C:\gitwork\HTTPServer" + "/fileExample.txt");
         }
 
         [TestMethod]
@@ -156,13 +156,46 @@ namespace HTTPServer.test
         [TestMethod]
         public void ServerWillRespondToPut()
         {
-            TestResponse("PUT /fileExample.txt HTTP/1.1\r\n\r\nThis will be in the file.", "HTTP/1.1 200 OK\r\n\r\n", @"C:\gitwork\HTTP Server");
+            TestResponse("PUT /fileExample.txt HTTP/1.1\r\n\r\nThis will be in the file.", "HTTP/1.1 200 OK\r\n\r\n", @"C:\gitwork\HTTPServer");
         }
 
         [TestMethod]
         public void ServerWillRespondToDelete()
         {
-            TestResponse("DELETE /fileExample.txt HTTP/1.1\r\n\r\n", "HTTP/1.1 200 OK\r\n\r\n", @"C:\gitwork\HTTP Server");
+            TestResponse("DELETE /fileExample.txt HTTP/1.1\r\n\r\n", "HTTP/1.1 200 OK\r\n\r\n", @"C:\gitwork\HTTPServer");
+        }
+
+        [TestMethod]
+        public void ServerCanHandleSplitMessages()
+        {
+            Socket socket = SetUpClient();
+            Server server = new Server();
+            var message = "";
+            Action<object> action1 = (object obj) => { ConnectClientToServer(socket, _ipEndPoint, server, new ConcretePathContents("")); };
+
+            Action<object> action2 =
+                (object obj) => { message = SendChunkedMessage(socket, _bytesReturned, "GET /extension HTTP/1.1\r\n\r\n"); };
+
+            Task t1 = new Task(action1, "");
+            Task t2 = new Task(action2, "");
+
+            t1.Start();
+            System.Threading.Thread.Sleep(100);
+            t2.Start();
+            t2.Wait();
+            CloseConnectionWithServer(socket, server);
+            Assert.Equal("HTTP/1.1 404 Not Found\r\n\r\n", message);
+        }
+
+        private string SendChunkedMessage(Socket socket, byte[] bytesReturned, string sentMessage)
+        {
+            byte[] firstBytesToSend = Encoding.UTF8.GetBytes(sentMessage.Substring(0, sentMessage.Length/2));
+            System.Threading.Thread.Sleep(100);
+            byte[] secondBytesToSend = Encoding.UTF8.GetBytes(sentMessage.Substring(sentMessage.Length / 2));
+            socket.Send(firstBytesToSend);
+            socket.Send(secondBytesToSend);
+            var bytesReceived = socket.Receive(bytesReturned);
+            return Encoding.UTF8.GetString(bytesReturned).Substring(0, bytesReceived);
         }
 
         private string CreateTempFile()

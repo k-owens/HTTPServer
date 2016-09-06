@@ -75,7 +75,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HTTP Server.core\HTTPServer.Core.csproj">
+    <ProjectReference Include="..\HTTPServer.core\HTTPServer.Core.csproj">
       <Project>{50254fb2-9ca3-4fa4-a684-235f80ee3e91}</Project>
       <Name>HTTPServer.Core</Name>
     </ProjectReference>
