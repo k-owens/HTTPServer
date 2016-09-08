@@ -13,12 +13,14 @@ namespace HTTPServer.core
         private IPathContents _pathContents;
         private IHttpHandler _httpHandler;
         private static bool keepRunning = true;
+        private int _timeout;
 
         public Server Start(ServerInfo serverInfo)
         {
             SetupSocket(serverInfo);
             _pathContents = serverInfo.PathContents;
             _httpHandler = serverInfo.HttpHandler;
+            _timeout = serverInfo.Timeout;
             Console.WriteLine("Server has started at port " + ((IPEndPoint)_socket.LocalEndPoint).Port);
             return this;
         }
@@ -42,6 +44,11 @@ namespace HTTPServer.core
             {
                 e.Cancel = true;
                 keepRunning = false;
+                if (_timeout != 0)
+                {
+                    System.Threading.Thread.Sleep(_timeout);
+                    Environment.Exit(0);
+                }
             };
 
             while (keepRunning)

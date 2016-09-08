@@ -24,7 +24,7 @@ namespace HTTPServer.test
         {
             Server server = new Server();
             IHttpHandler requestRouter = AddFunctionality("", new MockPathContents(""));
-            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
+            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter,0);
             Assert.True(server.Start(info) != null);
             server.Stop();
         }
@@ -34,7 +34,7 @@ namespace HTTPServer.test
         {
             Server server = new Server();
             IHttpHandler requestRouter = AddFunctionality("", new MockPathContents(""));
-            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
+            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter,0);
             server.Start(info);
             Assert.True(server.Stop());
         }
@@ -255,7 +255,7 @@ namespace HTTPServer.test
         private void ConnectClientToServer(Socket socket, IPEndPoint ipEndPoint, Server server, IPathContents pathContents)
         {
             IHttpHandler requestRouter = AddFunctionality("", pathContents);
-            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter);
+            ServerInfo info = new ServerInfo(8080, new MockPathContents(""), requestRouter,0);
             server.Start(info);
             socket.Connect(ipEndPoint);
             server.HandleClients();
