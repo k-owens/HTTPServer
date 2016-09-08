@@ -10,12 +10,10 @@ namespace HTTPServer.app
         private static Server server = new Server();
         private static int port = 0;
         private static string directoryPath = "";
-        private static string loggingFile = "";
         private static int timeout = 0;
 
         public static void Main(string[] args)
         {
-            
             HandleCommands(args);
             var pathContents = new ConcretePathContents(directoryPath);
             var requestHandler = AddFunctionality(pathContents);
@@ -50,9 +48,6 @@ namespace HTTPServer.app
                         break;
                     case "-t":
                         timeout = Int32.Parse(args[i + 1]);
-                        break;
-                    case ">":
-                        loggingFile = args[i + 1];
                         break;
                 }
             }

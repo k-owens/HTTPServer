@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using HTTPServer.core;
+using System;
+using System.IO;
 
 namespace HTTPServer.app
 {
@@ -22,7 +24,29 @@ namespace HTTPServer.app
                 reply.StartingLine = Encoding.UTF8.GetBytes("HTTP/1.1 400 Bad Request\r\n");
                 return reply;
             }
-            return _nextCommand.Execute(request);
+            var returnedReply = _nextCommand.Execute(request);
+            LogData(LogMessage(request, returnedReply));
+            return returnedReply;
+        }
+        
+        private void LogData(string loggingMessage)
+        {
+            Console.Write(loggingMessage);
+        }
+
+        private string LogMessage(Request request, Reply reply)
+        {
+            var responseCode = GetResponseCode(reply.StartingLine);
+            var logMessage = DateTime.Now.ToString() + " " + request.Method + " " + request.Uri + " "
+                + request.HttpVersion + " " + responseCode + "\r\n";
+            return logMessage;
+        }
+
+        public string GetResponseCode(byte[] response)
+        {
+            var firstLine = Encoding.UTF8.GetString(response);
+            var requestLine = firstLine.Split(' ', ' ');
+            return requestLine[1];
         }
 
         private bool IsMalformed(Request request)

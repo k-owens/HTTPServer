@@ -61,20 +61,5 @@ namespace HTTPServer.core
             }
             return headers;
         }
-        public string LogRequest(byte[] response, string ipAddress, DateTime date)
-        {
-            var responseCode = GetResponseCode(response);
-            var logMessage = ipAddress + " " + date.ToString() + " " + Method + " " + Uri + " " 
-                + HttpVersion + " " + responseCode + "\r\n";
-            return logMessage;
-        }
-
-        public string GetResponseCode(byte[] response)
-        {
-            var messageLines = Encoding.UTF8.GetString(response).Split('\n');
-            var firstLine = messageLines[0].Substring(0, messageLines[0].Length - 1);
-            var requestLine = firstLine.Split(' ', ' ');
-            return requestLine[1];
-        }
     }
 }
