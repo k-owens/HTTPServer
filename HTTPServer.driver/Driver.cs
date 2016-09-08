@@ -10,6 +10,8 @@ namespace HTTPServer.app
         private static Server server = new Server();
         private static int port = 0;
         private static string directoryPath = "";
+        private static string loggingFile = "";
+        private static int timeout = 0;
 
         public static void Main(string[] args)
         {
@@ -17,7 +19,7 @@ namespace HTTPServer.app
             HandleCommands(args);
             var pathContents = new ConcretePathContents(directoryPath);
             var requestHandler = AddFunctionality(pathContents);
-            var info = new ServerInfo(port, pathContents,requestHandler);
+            var info = new ServerInfo(port, pathContents,requestHandler,timeout);
             server.Start(info);
             server.HandleClients();
         }
@@ -36,15 +38,21 @@ namespace HTTPServer.app
 
         private static void HandleCommands(string[] args)
         {
-            for (var i = 0; i < args.Length && args[i][0] == '-'; i++)
+            for (var i = 0; i < args.Length; i++)
             {
-                switch (args[i][1])
+                switch (args[i])
                 {
-                    case 'p':
+                    case "-p":
                         port = Int32.Parse(args[i + 1]);
                         break;
-                    case 'd':
+                    case "-d":
                         directoryPath = args[i + 1];
+                        break;
+                    case "-t":
+                        timeout = Int32.Parse(args[i + 1]);
+                        break;
+                    case ">":
+                        loggingFile = args[i + 1];
                         break;
                 }
             }
